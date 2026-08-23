@@ -8,7 +8,7 @@ function validateRequests(req, res, next) {
     next();
 }
 
-export const validateRegister = [
+export const validateRegisterUser = [
     body("email")
         .isEmail().withMessage("Invalid email format"),
     body("contact")
