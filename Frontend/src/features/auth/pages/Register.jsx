@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hook/useAuth.js";
-import AuthBrand from "../components/AuthBrand.jsx";
 import GoogleButton from "../components/GoogleButton.jsx";
 import "../styles/Register.scss";
 
@@ -88,7 +87,10 @@ const Register = () => {
       {/* Left Form Pane */}
       <section className="register-layout__form-pane">
         <div className="register-layout__form-container">
-          <AuthBrand />
+          <Link to="/" className="auth-brand" aria-label="Nexgear Home">
+            <img src="/nexgear-logo.svg" alt="Nexgear" className="auth-brand__logo" />
+            <span className="auth-brand__text">Nexgear</span>
+          </Link>
 
           <header className="auth-header">
             <h1 className="auth-header__title">Create your Nexgear account</h1>
