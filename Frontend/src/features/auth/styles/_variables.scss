@@ -1,0 +1,65 @@
+// ==========================================
+// Nexgear Design System Tokens & Variables
+// ==========================================
+
+// Color Palette
+$bg-dark: #08090b;
+$bg-panel: #0d0e11;
+$bg-surface: #121418;
+$bg-input: #15171c;
+$bg-input-hover: #191b22;
+$bg-button-secondary: #16181d;
+$bg-button-secondary-hover: #1f2229;
+
+// Primary Brand Blue
+$color-primary: #0066ff;
+$color-primary-hover: #0052cc;
+$color-primary-active: #0041a8;
+$color-primary-glow: rgba(0, 102, 255, 0.28);
+$color-primary-subtle: rgba(0, 102, 255, 0.1);
+
+// Typography Colors
+$text-white: #ffffff;
+$text-primary: #f3f4f6;
+$text-secondary: #9499a6;
+$text-muted: #5e6473;
+$text-placeholder: #4a505e;
+$text-label: #858b99;
+
+// Accent Colors
+$accent-gold: #d4af37;
+$accent-gold-light: #e5c158;
+
+// Status & Feedback Colors
+$color-error: #ef4444;
+$color-error-bg: rgba(239, 68, 68, 0.12);
+$color-error-border: rgba(239, 68, 68, 0.28);
+$color-success: #10b981;
+$color-success-bg: rgba(16, 185, 129, 0.12);
+
+// Borders & Dividers
+$border-color: #21242c;
+$border-light: #2b303b;
+$border-focus: #0066ff;
+$divider-color: #1e2128;
+
+// Typography
+$font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-heading: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+$font-mono: 'Space Grotesk', 'Inter', monospace;
+
+// Transitions & Shadows
+$transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+$transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+$transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+$shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+$shadow-md: 0 4px 20px rgba(0, 0, 0, 0.35);
+$shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.5);
+$shadow-glow-blue: 0 0 24px rgba(0, 102, 255, 0.35);
+
+// Breakpoints
+$bp-mobile: 480px;
+$bp-tablet: 768px;
+$bp-laptop: 1024px;
+$bp-desktop: 1280px;
