@@ -15,8 +15,19 @@ export const useAuth = () => {
             dispatch(setError(error.response.data.message));
             dispatch(setLoading(false));
         }
-
     }
 
-    return { handleRegister }
+    async function handleLogin({ email, password }) {
+        dispatch(setLoading(true));
+        try {
+            const data = await login({ email, password });
+            dispatch(setUser(data.user));
+            dispatch(setLoading(false));
+        } catch (error) {
+            dispatch(setError(error.response.data.message));
+            dispatch(setLoading(false));
+        }
+    }
+
+    return { handleRegister, handleLogin }
 }
