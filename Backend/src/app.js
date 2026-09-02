@@ -1,6 +1,7 @@
 import cookieParser from "cookie-parser";
 import express from "express";
 import authRouter from "./routes/auth.routes.js";
+import ProductRouter from "./routes/product.routes.js";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { config } from "./config/config.js";
@@ -17,7 +18,7 @@ passport.use(new GoogleStrategy({
     clientSecret: config.GOOGLE_CLIENT_SECRET,
     callbackURL: "/api/auth/google/callback"
 }, (accessToken, refreshToken, profile, done) => {
-    done(null, profile);
+    return done(null, profile);
 })
 )
 
@@ -31,5 +32,6 @@ app.get("/", (req, res) => {
 
 // Routes
 app.use("/api/auth", authRouter);
+app.use("/api/products", ProductRouter);
 
 export default app;
