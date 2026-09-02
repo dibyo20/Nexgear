@@ -33,7 +33,7 @@ router.get("/seller", authenticateSeller, getSellerProducts);
 router.get("/", getAllProducts);
 
 /**
- * @route GET /api/products/:id
+ * @route GET /api/products/details/:id
  * @desc   Get product details by Id
  * @access Public
  */
