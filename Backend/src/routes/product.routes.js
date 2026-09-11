@@ -39,5 +39,12 @@ router.get("/", getAllProducts);
  */
 router.get("/details/:id", getProductDetails);
 
+/**
+ * @route POST /api/products/variant/:id
+ * @desc   Add a variant to a product
+ * @access Private
+ */
+router.post("/:productId/variants", authenticateSeller, upload.array("images", 5), addProductVariant);
+
 export default router;
 
