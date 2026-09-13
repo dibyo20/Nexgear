@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { register, login } from '../service/auth.api.js';
+import { register, login, getMe, logout } from '../service/auth.api.js';
 import { setUser, setLoading, setError, clearError } from '../state/auth.slice.js';
 
 export const useAuth = () => {
@@ -12,13 +12,12 @@ export const useAuth = () => {
     try {
       const data = await register({ email, contact, password, fullname, isSeller });
       dispatch(setUser(data.user));
-      dispatch(setLoading(false));
-      return { success: true, data };
+      return data.user;
     } catch (err) {
-      const message = err?.response?.data?.message || err?.message || "Registration failed. Please try again.";
-      dispatch(setError(message));
+      dispatch(setError(err?.response?.data?.message || err.message));
+      throw err;
+    } finally {
       dispatch(setLoading(false));
-      return { success: false, error: message };
     }
   }
 
@@ -28,13 +27,35 @@ export const useAuth = () => {
     try {
       const data = await login({ email, password });
       dispatch(setUser(data.user));
-      dispatch(setLoading(false));
-      return { success: true, data };
+      return data.user;
     } catch (err) {
-      const message = err?.response?.data?.message || err?.message || "Invalid credentials. Please try again.";
-      dispatch(setError(message));
+      dispatch(setError(err?.response?.data?.message || err.message));
+      throw err;
+    } finally {
       dispatch(setLoading(false));
-      return { success: false, error: message };
+    }
+  }
+
+  async function handleGetMe() {
+    dispatch(setLoading(true));
+    dispatch(clearError());
+    try {
+      const data = await getMe();
+      dispatch(setUser(data.user));
+      return data.user;
+    } catch (err) {
+      dispatch(setUser(null));
+      return null;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+
+  async function handleLogout() {
+    try {
+      await logout();
+    } finally {
+      dispatch(setUser(null));
     }
   }
 
@@ -48,6 +69,8 @@ export const useAuth = () => {
     error,
     handleRegister,
     handleLogin,
+    handleGetMe,
+    handleLogout,
     clearAuthError,
   };
 };
