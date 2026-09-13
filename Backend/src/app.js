@@ -1,7 +1,8 @@
 import cookieParser from "cookie-parser";
 import express from "express";
 import authRouter from "./routes/auth.routes.js";
-import ProductRouter from "./routes/product.routes.js";
+import productRouter from "./routes/product.routes.js";
+import cartRouter from "./routes/cart.routes.js";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { config } from "./config/config.js";
@@ -32,6 +33,7 @@ app.get("/", (req, res) => {
 
 // Routes
 app.use("/api/auth", authRouter);
-app.use("/api/products", ProductRouter);
+app.use("/api/products", productRouter);
+app.use("/api/cart", cartRouter);
 
 export default app;
