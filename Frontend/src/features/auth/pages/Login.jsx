@@ -38,9 +38,13 @@ const Login = () => {
       return;
     }
 
-    const result = await handleLogin(formData);
-    if (result?.success) {
-      navigate("/");
+    try {
+      const result = await handleLogin(formData);
+      if (result?.success || result) {
+        navigate("/");
+      }
+    } catch {
+      // Error handled and stored in Redux by useAuth
     }
   };
 

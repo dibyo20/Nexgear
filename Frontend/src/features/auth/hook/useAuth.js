@@ -12,7 +12,7 @@ export const useAuth = () => {
     try {
       const data = await register({ email, contact, password, fullname, isSeller });
       dispatch(setUser(data.user));
-      return data.user;
+      return data;
     } catch (err) {
       dispatch(setError(err?.response?.data?.message || err.message));
       throw err;
@@ -27,7 +27,7 @@ export const useAuth = () => {
     try {
       const data = await login({ email, password });
       dispatch(setUser(data.user));
-      return data.user;
+      return data;
     } catch (err) {
       dispatch(setError(err?.response?.data?.message || err.message));
       throw err;
@@ -52,10 +52,14 @@ export const useAuth = () => {
   }
 
   async function handleLogout() {
+    dispatch(setLoading(true));
     try {
       await logout();
-    } finally {
       dispatch(setUser(null));
+    } catch (err) {
+      dispatch(setError(err?.response?.data?.message || err.message));
+    } finally {
+      dispatch(setLoading(false));
     }
   }
 

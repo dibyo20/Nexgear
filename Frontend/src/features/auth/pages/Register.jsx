@@ -74,9 +74,13 @@ const Register = () => {
       isSeller: formData.isSeller,
     };
 
-    const result = await handleRegister(payload);
-    if (result?.success) {
-      navigate("/");
+    try {
+      const result = await handleRegister(payload);
+      if (result?.success || result) {
+        navigate("/");
+      }
+    } catch {
+      // Error handled and stored in Redux by useAuth
     }
   };
 
