@@ -105,3 +105,30 @@ export const login = async (req, res) => {
         return res.status(500).json({ message: "Server error" });
     }
 }
+
+export const getMe = async (req, res) => {
+    try {
+        const user = req.user;
+        if (!user) {
+            return res.status(401).json({ message: "Not authenticated" });
+        }
+
+        res.status(200).json({
+            sucess: true,
+            user: {
+                id: user._id,
+                fullname: user.fullname,
+                email: user.email,
+                contact: user.contact,
+                role: user.role,
+            },
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Server error" });
+    }
+};
+
+export const logout = async (req, res) => {
+    res.clearCookie("token");
+    res.status(200).json({ success: true, message: "Logged out successfully" });
+}
