@@ -29,16 +29,15 @@ export const register = async (req, res) => {
     const { email, contact, password, fullname, isSeller } = req.body;
 
     try {
-        const existingUser = await userModel.findOne({
-            $or: [{ email }, { contact }]
-        });
+        const query = contact ? { $or: [{ email }, { contact }] } : { email };
+        const existingUser = await userModel.findOne(query);
         if (existingUser) {
             return res.status(400).json({ message: "User already exists" });
         }
 
         const user = await userModel.create({
             email,
-            contact,
+            contact: contact || undefined,
             password,
             fullname,
             role: isSeller ? "seller" : "buyer"

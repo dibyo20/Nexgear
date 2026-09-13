@@ -12,7 +12,7 @@ export const validateRegisterUser = [
     body("email")
         .isEmail().withMessage("Invalid email format"),
     body("contact")
-        .notEmpty().withMessage("Contact number is required")
+        .optional({ checkFalsy: true })
         .matches(/^\d{10}$/).withMessage("Contact must be a 10-digit number"),
     body("password")
         .isLength({ min: 6 }).withMessage("Password must be at least 6 characters long"),
