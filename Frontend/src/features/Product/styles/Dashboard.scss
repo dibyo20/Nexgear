@@ -1,0 +1,304 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.nex-dashboard-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: $bg-dark;
+  color: $text-white;
+}
+
+.nex-dashboard-main {
+  flex: 1;
+  padding: 3rem 2rem 5rem;
+
+  @include tablet {
+    padding: 2rem 1.25rem 3.5rem;
+  }
+}
+
+.nex-dashboard-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+// Header
+.nex-dashboard-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+
+  @include tablet {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.nex-dashboard-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.nex-dashboard-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $color-primary;
+}
+
+.nex-dashboard-title {
+  font-family: $font-heading;
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: $text-white;
+
+  @include mobile {
+    font-size: 1.75rem;
+  }
+}
+
+.nex-dashboard-subtitle {
+  font-size: 0.95rem;
+  color: $text-secondary;
+}
+
+.nex-dashboard-btn-create {
+  @include button-primary;
+  height: 44px;
+  padding: 0 1.25rem;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+
+  @include mobile {
+    width: 100%;
+  }
+}
+
+// Stats
+.nex-dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+
+  @include tablet {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+.nex-stat-card {
+  background-color: $bg-surface;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  &__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    background-color: rgba(0, 102, 255, 0.1);
+    color: $color-primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  &__val {
+    font-family: $font-mono;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $text-white;
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+}
+
+// Table Card
+.nex-dashboard-table-card {
+  background-color: $bg-surface;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.nex-dashboard-table-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid $border-color;
+}
+
+.nex-dashboard-table-title {
+  font-family: $font-heading;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: $text-white;
+}
+
+.nex-dashboard-table-wrapper {
+  overflow-x: auto;
+}
+
+.nex-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+
+  th {
+    padding: 0.9rem 1.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: $text-label;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid $border-color;
+  }
+
+  td {
+    padding: 1.15rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    vertical-align: middle;
+  }
+
+  tbody tr {
+    transition: background-color $transition-fast;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+  }
+}
+
+.nex-table-product {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nex-table-thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: 6px;
+  object-fit: cover;
+  background-color: $bg-panel;
+  border: 1px solid $border-color;
+  flex-shrink: 0;
+}
+
+.nex-table-product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  max-width: 380px;
+}
+
+.nex-table-product-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: $text-white;
+}
+
+.nex-table-product-desc {
+  font-size: 0.78rem;
+  color: $text-secondary;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.nex-table-price {
+  font-family: $font-mono;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: $text-white;
+}
+
+.nex-table-variant-pill {
+  @include badge-pill;
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid $border-color;
+  color: $text-secondary;
+}
+
+.nex-table-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.nex-table-btn-manage {
+  @include button-outline;
+  height: 32px;
+  padding: 0 0.75rem;
+  font-size: 0.75rem;
+  border-radius: 6px;
+}
+
+.nex-table-btn-view {
+  font-size: 0.75rem;
+  color: $text-secondary;
+  text-decoration: none;
+  padding: 0.35rem 0.65rem;
+
+  &:hover {
+    color: $color-primary;
+  }
+}
+
+// Empty & Loading
+.nex-dashboard-loading,
+.nex-dashboard-empty {
+  padding: 4rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.75rem;
+
+  svg {
+    color: $text-muted;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: $text-white;
+  }
+
+  p {
+    font-size: 0.875rem;
+    color: $text-secondary;
+    max-width: 400px;
+    margin-bottom: 0.75rem;
+  }
+}
+
+.nex-dashboard-empty-btn {
+  @include button-primary;
+  height: 40px;
+  padding: 0 1.25rem;
+  font-size: 0.85rem;
+}

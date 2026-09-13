@@ -1,0 +1,217 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.nex-navbar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  background: rgba(8, 9, 11, 0.85);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid $border-color;
+  transition: all $transition-normal;
+
+  &__container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0.85rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+
+    @include tablet {
+      padding: 0.75rem 1.25rem;
+    }
+  }
+
+  // Brand
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  &__logo {
+    width: 24px;
+    height: 24px;
+    display: block;
+  }
+
+  &__brand-name {
+    font-family: $font-heading;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: $text-white;
+  }
+
+  &__brand-badge {
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    color: $text-secondary;
+  }
+
+  // Navigation Links
+  &__nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+
+    @include tablet {
+      display: none;
+    }
+  }
+
+  &__link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: $text-secondary;
+    text-decoration: none;
+    transition: color $transition-fast;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    &:hover {
+      color: $text-white;
+    }
+
+    &--seller {
+      color: $color-primary;
+      font-weight: 600;
+
+      &:hover {
+        color: color-mix(in srgb, $color-primary 80%, white);
+      }
+    }
+  }
+
+  // User Actions
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__user-menu {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid $border-color;
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+  }
+
+  &__avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: rgba(0, 102, 255, 0.18);
+    color: $color-primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__user-details {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__user-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: $text-white;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__role-badge {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+
+    &--seller {
+      background-color: rgba(0, 102, 255, 0.15);
+      color: $color-primary;
+      border: 1px solid rgba(0, 102, 255, 0.3);
+    }
+
+    &--buyer {
+      background-color: rgba(255, 255, 255, 0.06);
+      color: $text-secondary;
+    }
+  }
+
+  &__logout-btn {
+    background: transparent;
+    border: 1px solid $border-color;
+    color: $text-secondary;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:hover {
+      background-color: $color-error-bg;
+      border-color: $color-error-border;
+      color: $color-error;
+    }
+  }
+
+  &__auth-links {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__btn-login {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: $text-primary;
+    text-decoration: none;
+    padding: 0.5rem 0.9rem;
+    border-radius: 6px;
+    transition: color $transition-fast;
+
+    &:hover {
+      color: $text-white;
+    }
+  }
+
+  &__btn-register {
+    @include button-primary;
+    font-size: 0.825rem;
+    padding: 0.5rem 1rem;
+    height: 36px;
+    border-radius: 6px;
+  }
+}

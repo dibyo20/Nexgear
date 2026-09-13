@@ -41,7 +41,12 @@ const Login = () => {
     try {
       const result = await handleLogin(formData);
       if (result?.success || result) {
-        navigate("/");
+        const userRole = result?.user?.role || result?.role;
+        if (userRole === "seller") {
+          navigate("/seller/dashboard");
+        } else {
+          navigate("/");
+        }
       }
     } catch {
       // Error handled and stored in Redux by useAuth

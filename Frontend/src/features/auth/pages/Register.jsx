@@ -67,17 +67,25 @@ const Register = () => {
     }
 
     const payload = {
-      fullname: formData.fullname,
-      email: formData.email,
-      contact: formData.contact || "0000000000",
+      fullname: formData.fullname.trim(),
+      email: formData.email.trim(),
       password: formData.password,
       isSeller: formData.isSeller,
     };
 
+    if (formData.contact?.trim()) {
+      payload.contact = formData.contact.trim();
+    }
+
     try {
       const result = await handleRegister(payload);
       if (result?.success || result) {
-        navigate("/");
+        const userRole = result?.user?.role || result?.role;
+        if (userRole === "seller" || formData.isSeller) {
+          navigate("/seller/dashboard");
+        } else {
+          navigate("/");
+        }
       }
     } catch {
       // Error handled and stored in Redux by useAuth
@@ -160,6 +168,25 @@ const Register = () => {
                   className="auth-form__input"
                   autoComplete="email"
                   required
+                />
+              </div>
+            </div>
+
+            {/* Contact Number */}
+            <div className="auth-form__field">
+              <label htmlFor="reg-contact" className="auth-form__label">
+                Contact Number <span style={{ color: "#5e6473", textTransform: "none", fontWeight: 400 }}>(Optional)</span>
+              </label>
+              <div className="auth-form__input-wrapper">
+                <input
+                  id="reg-contact"
+                  type="tel"
+                  name="contact"
+                  value={formData.contact}
+                  onChange={handleChange}
+                  placeholder="10-digit phone number"
+                  className="auth-form__input"
+                  autoComplete="tel"
                 />
               </div>
             </div>

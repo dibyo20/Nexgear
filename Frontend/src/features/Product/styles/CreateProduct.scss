@@ -1,0 +1,282 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.nex-create-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: $bg-dark;
+  color: $text-white;
+}
+
+.nex-create-main {
+  flex: 1;
+  padding: 2.5rem 2rem 5rem;
+
+  @include tablet {
+    padding: 1.5rem 1.25rem 3.5rem;
+  }
+}
+
+.nex-create-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.nex-create-topbar {
+  margin-bottom: 1.5rem;
+}
+
+.nex-btn-back-dash {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.84rem;
+  color: $text-secondary;
+  text-decoration: none;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $color-primary;
+  }
+}
+
+.nex-create-card {
+  background-color: $bg-surface;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  padding: 2.5rem;
+
+  @include tablet {
+    padding: 1.75rem 1.25rem;
+  }
+}
+
+.nex-create-header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding-bottom: 1.75rem;
+  border-bottom: 1px solid $border-color;
+  margin-bottom: 2rem;
+}
+
+.nex-create-icon-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background-color: rgba(0, 102, 255, 0.12);
+  border: 1px solid rgba(0, 102, 255, 0.25);
+  color: $color-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nex-create-title {
+  font-family: $font-heading;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $text-white;
+  margin-bottom: 0.25rem;
+}
+
+.nex-create-subtitle {
+  font-size: 0.85rem;
+  color: $text-secondary;
+  line-height: 1.4;
+}
+
+.nex-create-error-banner {
+  background-color: $color-error-bg;
+  border: 1px solid $color-error-border;
+  color: color-mix(in srgb, $color-error 80%, white);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 1.75rem;
+}
+
+.nex-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.nex-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  &.flex-1 {
+    flex: 1;
+  }
+
+  &.flex-2 {
+    flex: 2;
+  }
+}
+
+.nex-form-row {
+  display: flex;
+  gap: 1.25rem;
+
+  @include mobile {
+    flex-direction: column;
+  }
+}
+
+.nex-form-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $text-label;
+}
+
+.nex-form-input {
+  @include modern-input;
+  height: 44px;
+}
+
+.nex-form-textarea {
+  @include modern-textarea;
+}
+
+.nex-form-select {
+  @include modern-input;
+  height: 44px;
+  cursor: pointer;
+
+  option {
+    background-color: $bg-input;
+    color: $text-white;
+  }
+}
+
+// Upload Zone
+.nex-upload-zone {
+  position: relative;
+  border: 2px dashed $border-color;
+  border-radius: 10px;
+  background-color: $bg-input;
+  transition: all $transition-normal;
+  overflow: hidden;
+
+  &:hover {
+    border-color: $color-primary;
+    background-color: $bg-input-hover;
+  }
+}
+
+.nex-upload-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.nex-upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.25rem 1.5rem;
+  text-align: center;
+  gap: 0.5rem;
+  cursor: pointer;
+
+  svg {
+    color: $color-primary;
+  }
+}
+
+.nex-upload-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: $text-white;
+}
+
+.nex-upload-hint {
+  font-size: 0.75rem;
+  color: $text-muted;
+}
+
+// Preview Grid
+.nex-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.nex-preview-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid $border-color;
+  background-color: $bg-panel;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.nex-preview-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  background-color: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: $text-white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    background-color: $color-error;
+    border-color: $color-error;
+  }
+}
+
+// Actions
+.nex-create-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid $border-color;
+  margin-top: 0.5rem;
+}
+
+.nex-btn-cancel {
+  @include button-secondary;
+  height: 44px;
+  padding: 0 1.5rem;
+  font-size: 0.875rem;
+}
+
+.nex-btn-submit-create {
+  @include button-primary;
+  height: 44px;
+  padding: 0 1.75rem;
+  font-size: 0.9rem;
+}

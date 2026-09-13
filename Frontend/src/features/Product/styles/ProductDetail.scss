@@ -1,0 +1,419 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.nex-detail-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: $bg-dark;
+  color: $text-white;
+}
+
+.nex-detail-main {
+  flex: 1;
+  padding: 2.5rem 2rem 5rem;
+
+  @include tablet {
+    padding: 1.5rem 1.25rem 3.5rem;
+  }
+}
+
+.nex-detail-container {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+// Breadcrumb
+.nex-detail-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: $text-secondary;
+  margin-bottom: 2rem;
+
+  a {
+    color: $text-secondary;
+    text-decoration: none;
+    transition: color $transition-fast;
+
+    &:hover {
+      color: $text-white;
+    }
+  }
+
+  .current {
+    color: $text-white;
+    font-weight: 500;
+  }
+}
+
+// Layout Grid
+.nex-detail-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 4rem;
+  align-items: flex-start;
+
+  @include laptop {
+    gap: 2.5rem;
+  }
+
+  @include tablet {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+}
+
+// Gallery Column
+.nex-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  &__hero {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background-color: $bg-panel;
+    border: 1px solid $border-color;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  &__img-main {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  &__thumbs {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+
+  &__thumb {
+    width: 72px;
+    height: 72px;
+    border-radius: 8px;
+    border: 1px solid $border-color;
+    background-color: $bg-surface;
+    cursor: pointer;
+    overflow: hidden;
+    padding: 0;
+    flex-shrink: 0;
+    transition: all $transition-fast;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    &:hover {
+      border-color: $border-light;
+    }
+
+    &.is-active {
+      border-color: $color-primary;
+      box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.4);
+    }
+  }
+}
+
+// Product Info Column
+.nex-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+
+  &__badges {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .nex-badge-primary {
+    @include badge-pill;
+    background: rgba(0, 102, 255, 0.12);
+    border: 1px solid rgba(0, 102, 255, 0.3);
+    color: #60a5fa;
+  }
+
+  .nex-badge-stock {
+    @include badge-pill;
+
+    &.in-stock {
+      background: $color-success-bg;
+      color: $color-success;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    &.out-of-stock {
+      background: $color-error-bg;
+      color: $color-error;
+      border: 1px solid $color-error-border;
+    }
+  }
+
+  &__title {
+    font-family: $font-heading;
+    font-size: 2.25rem;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.15;
+    color: $text-white;
+    margin-bottom: 0.75rem;
+
+    @include mobile {
+      font-size: 1.75rem;
+    }
+  }
+
+  &__price-strip {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  &__price {
+    font-family: $font-mono;
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: $text-white;
+  }
+
+  &__tax-note {
+    font-size: 0.8rem;
+    color: $text-muted;
+  }
+
+  &__desc {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: $text-secondary;
+  }
+}
+
+// Variants
+.nex-variants-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.nex-variants-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $text-label;
+}
+
+.nex-variants-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.nex-variant-btn {
+  background-color: $bg-input;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all $transition-fast;
+
+  &:hover {
+    background-color: $bg-input-hover;
+    border-color: $border-light;
+  }
+
+  &.is-selected {
+    background-color: rgba(0, 102, 255, 0.08);
+    border-color: $color-primary;
+    box-shadow: 0 0 0 1px $color-primary;
+
+    .nex-variant-name {
+      color: $text-white;
+      font-weight: 600;
+    }
+  }
+
+  .nex-variant-name {
+    font-size: 0.84rem;
+    color: $text-primary;
+  }
+
+  .nex-variant-price {
+    font-family: $font-mono;
+    font-size: 0.78rem;
+    color: $text-secondary;
+  }
+}
+
+// Spec Pills
+.nex-spec-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.nex-spec-pill {
+  display: inline-flex;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  background-color: $bg-surface;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  .nex-spec-key {
+    color: $text-muted;
+    text-transform: capitalize;
+  }
+
+  .nex-spec-val {
+    color: $text-white;
+    font-weight: 500;
+  }
+}
+
+// Purchase Controls
+.nex-purchase-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  @include mobile {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.nex-quantity-selector {
+  display: flex;
+  align-items: center;
+  background-color: $bg-input;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  height: 48px;
+  padding: 0 0.5rem;
+
+  button {
+    background: transparent;
+    border: none;
+    color: $text-white;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color $transition-fast;
+
+    &:hover:not(:disabled) {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+  }
+
+  span {
+    font-family: $font-mono;
+    font-weight: 600;
+    min-width: 32px;
+    text-align: center;
+    color: $text-white;
+  }
+}
+
+.nex-btn-add-cart {
+  @include button-primary;
+  flex: 1;
+  height: 48px;
+  font-size: 0.95rem;
+}
+
+.nex-cart-error-banner {
+  background-color: $color-error-bg;
+  border: 1px solid $color-error-border;
+  color: #f87171;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+// Guarantee Section
+.nex-guarantee-box {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  background-color: $bg-surface;
+  border: 1px solid $border-color;
+  border-radius: 10px;
+}
+
+.nex-guarantee-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+
+  svg {
+    color: $color-primary;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  strong {
+    display: block;
+    font-size: 0.85rem;
+    color: $text-white;
+    margin-bottom: 0.2rem;
+  }
+
+  p {
+    font-size: 0.78rem;
+    color: $text-secondary;
+    line-height: 1.4;
+    margin: 0;
+  }
+}
+
+// Loading / Not Found States
+.nex-detail-loading,
+.nex-detail-not-found {
+  min-height: 50vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1rem;
+}
+
+.nex-btn-back {
+  @include button-secondary;
+  margin-top: 1rem;
+}
