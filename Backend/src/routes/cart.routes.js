@@ -6,6 +6,6 @@ const router = express.Router();
 
 router.use(authenticateUser);
 
-router.get('/', addToCart);
+router.post('/:productId/:variantId', addToCart);
 
 export default router;

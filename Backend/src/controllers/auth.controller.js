@@ -75,7 +75,7 @@ export const googleCallback = async (req, res) => {
 
     res.cookie("token", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: config.NODE_ENV === "production",
         sameSite: "lax",
     });
 
@@ -95,7 +95,7 @@ export const login = async (req, res) => {
             return res.status(401).json({ message: "Invalid email or password" });
         }
 
-        const isMatch = bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(401).json({ message: "Invalid email or password" });
         }
@@ -114,7 +114,7 @@ export const getMe = async (req, res) => {
         }
 
         res.status(200).json({
-            sucess: true,
+            success: true,
             user: {
                 id: user._id,
                 fullname: user.fullname,

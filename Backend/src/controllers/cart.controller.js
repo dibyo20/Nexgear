@@ -52,13 +52,15 @@ export const addToCart = async (req, res) => {
         });
     }
 
+    const variant = product.variants.find(v => v._id.toString() === variantId);
+
     const item = {
         product: productId,
         variant: variantId,
         quantity,
         price: {
-            amount: variant.price.amount,
-            currency: variant.price.currency
+            amount: variant?.price?.amount || product.price?.amount,
+            currency: variant?.price?.currency || product.price?.currency || "INR"
         }
     }
 

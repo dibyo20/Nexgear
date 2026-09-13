@@ -91,14 +91,16 @@ export async function addProductVariant(req, res) {
 
     const files = req.files;
     const images = [];
-    if (files || files.length !== 0) {
-        (await Promise.all(files.map(async (file) => {
-            const image = await uploadFile({
-                buffer: file.buffer,
-                fileName: file.originalname,
-            });
-            return image
-        }))).map((image) => images.push(image));
+    if (files && files.length > 0) {
+        const uploadedImages = await Promise.all(
+            files.map(async (file) => {
+                return await uploadFile({
+                    buffer: file.buffer,
+                    fileName: file.originalname,
+                });
+            })
+        );
+        images.push(...uploadedImages);
     }
 
     const price = req.body.priceAmount;
