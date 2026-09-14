@@ -77,7 +77,7 @@
     font-weight: 500;
     color: $text-secondary;
     text-decoration: none;
-    transition: color $transition-fast;
+    transition: all $transition-fast;
     display: flex;
     align-items: center;
     gap: 0.4rem;
@@ -86,7 +86,7 @@
       color: $text-white;
     }
 
-    &--seller {
+    &--active {
       color: $color-primary;
       font-weight: 600;
 

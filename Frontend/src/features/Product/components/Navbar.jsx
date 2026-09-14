@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/hook/useAuth.js";
 import { BoxIcon, PlusIcon, LogoutIcon, UserIcon } from "./Icons.jsx";
 import "../styles/Navbar.scss";
@@ -17,7 +17,7 @@ export const Navbar = () => {
     <header className="nex-navbar">
       <div className="nex-navbar__container">
         {/* Brand */}
-        <Link to={user ? "/home" : "/"} className="nex-navbar__brand" aria-label="Nexgear Home">
+        <Link to={user ? (user.role === "seller" ? "/seller/dashboard" : "/home") : "/"} className="nex-navbar__brand" aria-label="Nexgear Home">
           <img src="/nexgear-logo.svg" alt="Nexgear" className="nex-navbar__logo" />
           <span className="nex-navbar__brand-name">Nexgear</span>
           <span className="nex-navbar__brand-badge">STUDIO</span>
@@ -26,14 +26,24 @@ export const Navbar = () => {
         {/* Navigation Links */}
         {user?.role === "seller" && (
           <nav className="nex-navbar__nav">
-            <Link to="/seller/dashboard" className="nex-navbar__link nex-navbar__link--seller">
+            <NavLink
+              to="/seller/dashboard"
+              className={({ isActive }) =>
+                `nex-navbar__link ${isActive ? "nex-navbar__link--active" : ""}`
+              }
+            >
               <BoxIcon size={16} />
               <span>Seller Portal</span>
-            </Link>
-            <Link to="/seller/products/create" className="nex-navbar__link nex-navbar__link--seller">
+            </NavLink>
+            <NavLink
+              to="/seller/products/create"
+              className={({ isActive }) =>
+                `nex-navbar__link ${isActive ? "nex-navbar__link--active" : ""}`
+              }
+            >
               <PlusIcon size={16} />
               <span>New Listing</span>
-            </Link>
+            </NavLink>
           </nav>
         )}
 
