@@ -6,10 +6,11 @@ import { useProduct } from "../hooks/useProduct.js";
 import {
   ArrowLeftIcon,
   PlusIcon,
-  LayersIcon,
-  UploadIcon,
   CheckIcon,
+  SparklesIcon,
   BoxIcon,
+  UploadIcon,
+  ExternalLinkIcon,
 } from "../components/Icons.jsx";
 import "../styles/SellerProductDetails.scss";
 
@@ -186,6 +187,7 @@ export const SellerProductDetails = () => {
               rel="noreferrer"
             >
               <span>View Public Page</span>
+              <ExternalLinkIcon size={14} />
             </Link>
           </div>
 

@@ -255,18 +255,19 @@ export const ProductDetail = () => {
               )}
 
               {/* Attributes Specifications Pill Grid */}
-              {activeVariant?.attributes && (
-                <div className="nex-spec-pills">
-                  {Object.entries(activeVariant.attributes).map(
-                    ([key, val]) => (
-                      <div key={key} className="nex-spec-pill">
-                        <span className="nex-spec-key">{key}:</span>
-                        <span className="nex-spec-val">{String(val)}</span>
-                      </div>
-                    )
-                  )}
-                </div>
-              )}
+              {activeVariant?.attributes &&
+                Object.keys(activeVariant.attributes).length > 0 && (
+                  <div className="nex-spec-pills">
+                    {Object.entries(activeVariant.attributes).map(
+                      ([key, val]) => (
+                        <div key={key} className="nex-spec-pill">
+                          <span className="nex-spec-key">{key}:</span>
+                          <span className="nex-spec-val">{String(val)}</span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
 
               {/* Purchase Controls */}
               <div className="nex-purchase-box">
