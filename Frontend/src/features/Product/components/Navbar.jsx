@@ -17,30 +17,25 @@ export const Navbar = () => {
     <header className="nex-navbar">
       <div className="nex-navbar__container">
         {/* Brand */}
-        <Link to="/" className="nex-navbar__brand" aria-label="Nexgear Home">
+        <Link to={user ? "/home" : "/"} className="nex-navbar__brand" aria-label="Nexgear Home">
           <img src="/nexgear-logo.svg" alt="Nexgear" className="nex-navbar__logo" />
           <span className="nex-navbar__brand-name">Nexgear</span>
           <span className="nex-navbar__brand-badge">STUDIO</span>
         </Link>
 
         {/* Navigation Links */}
-        <nav className="nex-navbar__nav">
-          <Link to="/" className="nex-navbar__link">
-            Instruments
-          </Link>
-          {user?.role === "seller" && (
-            <>
-              <Link to="/seller/dashboard" className="nex-navbar__link nex-navbar__link--seller">
-                <BoxIcon size={16} />
-                <span>Seller Portal</span>
-              </Link>
-              <Link to="/seller/products/create" className="nex-navbar__link nex-navbar__link--seller">
-                <PlusIcon size={16} />
-                <span>New Listing</span>
-              </Link>
-            </>
-          )}
-        </nav>
+        {user?.role === "seller" && (
+          <nav className="nex-navbar__nav">
+            <Link to="/seller/dashboard" className="nex-navbar__link nex-navbar__link--seller">
+              <BoxIcon size={16} />
+              <span>Seller Portal</span>
+            </Link>
+            <Link to="/seller/products/create" className="nex-navbar__link nex-navbar__link--seller">
+              <PlusIcon size={16} />
+              <span>New Listing</span>
+            </Link>
+          </nav>
+        )}
 
         {/* Actions / Auth */}
         <div className="nex-navbar__actions">

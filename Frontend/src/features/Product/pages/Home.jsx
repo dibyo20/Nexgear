@@ -5,20 +5,26 @@ import Footer from "../components/Footer.jsx";
 import ProductCard from "../components/ProductCard.jsx";
 import { useProduct } from "../hooks/useProduct.js";
 import { useAuth } from "../../auth/hook/useAuth.js";
-import {
-  SearchIcon,
-  SparklesIcon,
-  ShieldIcon,
-  LayersIcon,
-  BoxIcon,
-  ArrowRightIcon,
-} from "../components/Icons.jsx";
+import { SearchIcon, BoxIcon, SparklesIcon } from "../components/Icons.jsx";
 import "../styles/Home.scss";
+
+const DISPLAY_CATEGORIES = [
+  "All Items",
+  "Keyboards",
+  "Gaming Mice",
+  "Mechanical Switches",
+  "Keycap Sets",
+  "Artisan Caps",
+  "Audio & Acoustics",
+  "Desk Mats & Accessories",
+];
 
 export const Home = () => {
   const navigate = useNavigate();
   const { products, loading, handleGetAllProducts } = useProduct();
   const { user } = useAuth();
+
+  const [activeCategory, setActiveCategory] = useState("All Items");
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -31,12 +37,13 @@ export const Home = () => {
     handleGetAllProducts();
   }, []);
 
-  const filteredProducts = products.filter((p) => {
+  // Filter products by search text
+  const filteredProducts = products.filter((product) => {
     if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
+    const q = searchQuery.toLowerCase().trim();
     return (
-      p.title?.toLowerCase().includes(q) ||
-      p.description?.toLowerCase().includes(q)
+      product.title?.toLowerCase().includes(q) ||
+      product.description?.toLowerCase().includes(q)
     );
   });
 
@@ -45,154 +52,120 @@ export const Home = () => {
       <Navbar />
 
       <main className="nex-home__main">
-        {/* Hero Section */}
-        <section className="nex-hero">
-          <div className="nex-hero__bg-glow" />
-          <div className="nex-hero__container">
-            <div className="nex-hero__badge">
-              <SparklesIcon size={14} />
-              <span>Nexgear Studio Architecture</span>
-            </div>
-
-            <h1 className="nex-hero__title">
-              Precision in every <span className="text-gradient">keystroke.</span>
-            </h1>
-
-            <p className="nex-hero__subtitle">
-              Engineered with aerospace-grade 6063 aluminum, customized acoustic isolation,
-              and hot-swappable PCB platforms. Designed for engineers and creators.
-            </p>
-
-            <div className="nex-hero__cta-group">
-              <a href="#catalog" className="nex-hero__btn-primary">
-                <span>Browse Instruments</span>
-                <ArrowRightIcon size={16} />
-              </a>
-
-              {user?.role === "seller" ? (
-                <Link to="/seller/products/create" className="nex-hero__btn-secondary">
-                  <BoxIcon size={16} />
-                  <span>Publish New Product</span>
-                </Link>
-              ) : (
-                <Link to="/register" className="nex-hero__btn-secondary">
-                  <span>Join Nexgear</span>
-                </Link>
-              )}
-            </div>
-
-            {/* Hardware Specs Highlight Ribbon */}
-            <div className="nex-hero__specs-bar">
-              <div className="nex-hero__spec-item">
-                <span className="nex-hero__spec-val">1000Hz</span>
-                <span className="nex-hero__spec-label">Polling Rate</span>
-              </div>
-              <div className="nex-hero__spec-divider" />
-              <div className="nex-hero__spec-item">
-                <span className="nex-hero__spec-val">6063</span>
-                <span className="nex-hero__spec-label">Anodized Alloy</span>
-              </div>
-              <div className="nex-hero__spec-divider" />
-              <div className="nex-hero__spec-item">
-                <span className="nex-hero__spec-val">5-Layer</span>
-                <span className="nex-hero__spec-label">Acoustic Dampening</span>
-              </div>
-              <div className="nex-hero__spec-divider" />
-              <div className="nex-hero__spec-item">
-                <span className="nex-hero__spec-val">Hot-Swap</span>
-                <span className="nex-hero__spec-label">Universal Sockets</span>
+        {/* Top Search & Store Header */}
+        <section className="nex-store-top">
+          <div className="nex-store-top__container">
+            <div className="nex-store-top__header">
+              <div>
+                <div className="nex-store-top__badge">
+                  <SparklesIcon size={13} />
+                  <span>Studio Hardware Inventory</span>
+                </div>
+                <h1 className="nex-store-top__title">Available Instruments & Gear</h1>
+                <p className="nex-store-top__subtitle">
+                  Browse professional keyboards, precision mice, switches, and artisan components.
+                </p>
               </div>
             </div>
-          </div>
-        </section>
 
-        {/* Engineering Pillars */}
-        <section className="nex-pillars">
-          <div className="nex-pillars__container">
-            <div className="nex-pillar-card">
-              <div className="nex-pillar-card__icon">
-                <ShieldIcon size={22} />
-              </div>
-              <h3 className="nex-pillar-card__title">Solid CNC Machining</h3>
-              <p className="nex-pillar-card__desc">
-                Precision cut from single blocks of aluminum with bead-blasted and anodized finishes.
-              </p>
-            </div>
-
-            <div className="nex-pillar-card">
-              <div className="nex-pillar-card__icon">
-                <LayersIcon size={22} />
-              </div>
-              <h3 className="nex-pillar-card__title">Gasket Suspension</h3>
-              <p className="nex-pillar-card__desc">
-                Custom silicone and poron isolators deliver a cushioned typing experience and deep sound profile.
-              </p>
-            </div>
-
-            <div className="nex-pillar-card">
-              <div className="nex-pillar-card__icon">
-                <BoxIcon size={22} />
-              </div>
-              <h3 className="nex-pillar-card__title">Curated Marketplace</h3>
-              <p className="nex-pillar-card__desc">
-                Verified artisan makers and custom mechanical components, backed by authentic warranty.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Product Catalog Section */}
-        <section id="catalog" className="nex-catalog">
-          <div className="nex-catalog__container">
-            <div className="nex-catalog__header">
-              <div className="nex-catalog__titles">
-                <span className="nex-catalog__eyebrow">Studio Inventory</span>
-                <h2 className="nex-catalog__heading">Available Instruments & Parts</h2>
-              </div>
-
-              {/* Search Bar */}
-              <div className="nex-catalog__search-box">
-                <SearchIcon size={16} className="nex-catalog__search-icon" />
+            {/* 1. Search Option at Top */}
+            <div className="nex-store-top__search-row">
+              <div className="nex-store-top__search-box">
+                <SearchIcon size={18} className="nex-store-top__search-icon" />
                 <input
                   type="text"
-                  placeholder="Search by model, switch, keycap..."
+                  placeholder="Search products by model name, switch, keycap..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="nex-catalog__search-input"
+                  className="nex-store-top__search-input"
                 />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="nex-store-top__search-clear"
+                    aria-label="Clear search"
+                  >
+                    &times;
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Catalog Grid */}
+            {/* 2. Different Types of Categories Filter (UI placeholder for now) */}
+            <div className="nex-store-top__categories-row">
+              <span className="nex-store-top__categories-label">Categories:</span>
+              <div className="nex-store-top__categories-list" role="tablist">
+                {DISPLAY_CATEGORIES.map((category) => {
+                  const isActive = activeCategory === category;
+                  return (
+                    <button
+                      key={category}
+                      type="button"
+                      onClick={() => setActiveCategory(category)}
+                      className={`nex-store-top__category-chip ${
+                        isActive ? "nex-store-top__category-chip--active" : ""
+                      }`}
+                      role="tab"
+                      aria-selected={isActive}
+                    >
+                      {category}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 3. Listed Products Shown One by One */}
+        <section className="nex-store-products">
+          <div className="nex-store-products__container">
+            <div className="nex-store-products__header">
+              <h2 className="nex-store-products__heading">
+                All Products ({filteredProducts.length})
+              </h2>
+            </div>
+
             {loading && products.length === 0 ? (
-              <div className="nex-catalog__loading-grid">
-                {[1, 2, 3, 4].map((n) => (
+              <div className="nex-store-products__loading-grid">
+                {[1, 2, 3, 4, 5, 6].map((n) => (
                   <div key={n} className="nex-skeleton-card" />
                 ))}
               </div>
             ) : filteredProducts.length > 0 ? (
-              <div className="nex-catalog__grid">
+              <div className="nex-store-products__grid">
                 {filteredProducts.map((product) => (
                   <ProductCard key={product._id} product={product} />
                 ))}
               </div>
             ) : (
-              <div className="nex-catalog__empty">
-                <BoxIcon size={48} className="nex-catalog__empty-icon" />
-                <h3 className="nex-catalog__empty-title">
-                  {searchQuery ? "No matching instruments found" : "No instruments listed yet"}
+              <div className="nex-store-products__empty">
+                <BoxIcon size={48} className="nex-store-products__empty-icon" />
+                <h3 className="nex-store-products__empty-title">
+                  {searchQuery ? "No matching products found" : "No instruments listed yet"}
                 </h3>
-                <p className="nex-catalog__empty-desc">
+                <p className="nex-store-products__empty-desc">
                   {searchQuery
-                    ? "Try adjusting your search terms or view our full catalog."
-                    : "Become the first maker to publish a custom keyboard or artisan component."}
+                    ? "Try adjusting your search query."
+                    : "Products will be displayed here as they are published by sellers."}
                 </p>
-                {user?.role === "seller" && (
-                  <Link to="/seller/products/create" className="nex-catalog__empty-btn">
+                {searchQuery ? (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="nex-store-products__empty-btn"
+                  >
+                    Clear Search
+                  </button>
+                ) : user?.role === "seller" ? (
+                  <Link
+                    to="/seller/products/create"
+                    className="nex-store-products__empty-btn"
+                  >
                     <BoxIcon size={16} />
                     <span>Create First Listing</span>
                   </Link>
-                )}
+                ) : null}
               </div>
             )}
           </div>

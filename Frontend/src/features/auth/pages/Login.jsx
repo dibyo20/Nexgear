@@ -45,7 +45,7 @@ const Login = () => {
         if (userRole === "seller") {
           navigate("/seller/dashboard");
         } else {
-          navigate("/");
+          navigate("/home");
         }
       }
     } catch {

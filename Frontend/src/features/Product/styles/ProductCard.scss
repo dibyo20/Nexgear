@@ -62,6 +62,23 @@
     pointer-events: none;
   }
 
+  &__badge-category {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 102, 255, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 0.22rem 0.55rem;
+    border-radius: 4px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #ffffff;
+    z-index: 2;
+  }
+
   &__badge-variant {
     position: absolute;
     top: 10px;

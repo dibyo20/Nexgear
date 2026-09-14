@@ -16,254 +16,203 @@
 }
 
 // ----------------------------------------
-// Hero Section
+// Store Top Section (Search & Categories)
 // ----------------------------------------
-.nex-hero {
+.nex-store-top {
   position: relative;
-  padding: 6rem 2rem 5rem;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
+  padding: 3rem 2rem 2rem;
+  background: linear-gradient(180deg, rgba(0, 102, 255, 0.08) 0%, rgba(8, 9, 11, 0) 100%);
   border-bottom: 1px solid $border-color;
 
   @include tablet {
-    padding: 4rem 1.25rem 3.5rem;
-  }
-
-  &__bg-glow {
-    position: absolute;
-    top: -20%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 650px;
-    height: 450px;
-    background: radial-gradient(circle, rgba(0, 102, 255, 0.18) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 1;
+    padding: 2rem 1.25rem 1.5rem;
   }
 
   &__container {
-    max-width: 900px;
+    max-width: 1280px;
     margin: 0 auto;
-    text-align: center;
-    position: relative;
-    z-index: 2;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    gap: 1.75rem;
+  }
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
   }
 
   &__badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    background: rgba(0, 102, 255, 0.1);
-    border: 1px solid rgba(0, 102, 255, 0.25);
+    gap: 0.45rem;
+    background: rgba(0, 102, 255, 0.12);
+    border: 1px solid rgba(0, 102, 255, 0.3);
     color: #60a5fa;
-    padding: 0.35rem 0.85rem;
+    padding: 0.3rem 0.75rem;
     border-radius: 9999px;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.6rem;
   }
 
   &__title {
     font-family: $font-heading;
-    font-size: 3.75rem;
+    font-size: 2.25rem;
     font-weight: 800;
-    letter-spacing: -0.04em;
-    line-height: 1.08;
+    letter-spacing: -0.03em;
     color: $text-white;
-    margin-bottom: 1.5rem;
-
-    @include tablet {
-      font-size: 2.75rem;
-    }
+    line-height: 1.15;
 
     @include mobile {
-      font-size: 2.2rem;
-    }
-
-    .text-gradient {
-      background: linear-gradient(135deg, #ffffff 30%, #60a5fa 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-size: 1.75rem;
     }
   }
 
   &__subtitle {
-    font-size: 1.125rem;
-    line-height: 1.6;
+    font-size: 0.95rem;
     color: $text-secondary;
-    max-width: 680px;
-    margin-bottom: 2.25rem;
-
-    @include mobile {
-      font-size: 0.95rem;
-    }
+    margin-top: 0.35rem;
+    max-width: 600px;
   }
 
-  &__cta-group {
+  // 1. Search Box at Top
+  &__search-row {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 3.5rem;
-
-    @include mobile {
-      flex-direction: column;
-      width: 100%;
-      max-width: 320px;
-    }
-  }
-
-  &__btn-primary {
-    @include button-primary;
-    height: 48px;
-    padding: 0 1.75rem;
-    font-size: 0.9375rem;
-
-    @include mobile {
-      width: 100%;
-    }
-  }
-
-  &__btn-secondary {
-    @include button-secondary;
-    height: 48px;
-    padding: 0 1.5rem;
-    font-size: 0.9375rem;
-
-    @include mobile {
-      width: 100%;
-    }
-  }
-
-  // Specs Ribbon
-  &__specs-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2rem;
-    @include glass-panel(0.5, 12px);
-    border-radius: 12px;
-    padding: 1rem 2rem;
     width: 100%;
-    max-width: 760px;
+  }
 
-    @include tablet {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.25rem;
-      padding: 1.25rem;
+  &__search-box {
+    position: relative;
+    width: 100%;
+    max-width: 680px;
+  }
+
+  &__search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $text-muted;
+    pointer-events: none;
+  }
+
+  &__search-input {
+    @include modern-input;
+    height: 48px;
+    padding-left: 3rem;
+    padding-right: 2.5rem;
+    font-size: 0.925rem;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    transition: all $transition-normal;
+
+    &:focus {
+      border-color: $color-primary;
+      background-color: rgba(255, 255, 255, 0.05);
+      box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.2), 0 4px 20px rgba(0, 0, 0, 0.3);
     }
   }
 
-  &__spec-item {
+  &__search-clear {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: $text-muted;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.2rem;
+
+    &:hover {
+      color: $text-white;
+    }
+  }
+
+  // 2. Categories Filter Row
+  &__categories-row {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 0.2rem;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
   }
 
-  &__spec-val {
-    font-family: $font-mono;
-    font-size: 1.15rem;
+  &__categories-label {
+    font-size: 0.78rem;
     font-weight: 700;
-    color: $text-white;
-  }
-
-  &__spec-label {
-    font-size: 0.68rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: $text-muted;
+    white-space: nowrap;
   }
 
-  &__spec-divider {
-    width: 1px;
-    height: 28px;
-    background-color: $border-color;
-
-    @include tablet {
-      display: none;
-    }
-  }
-}
-
-// ----------------------------------------
-// Engineering Pillars
-// ----------------------------------------
-.nex-pillars {
-  padding: 4rem 2rem;
-  border-bottom: 1px solid $border-color;
-  background-color: rgba(13, 14, 17, 0.4);
-
-  &__container {
-    max-width: 1280px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-
-    @include tablet {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-  }
-}
-
-.nex-pillar-card {
-  background-color: $bg-surface;
-  border: 1px solid $border-color;
-  border-radius: 12px;
-  padding: 1.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  transition: all $transition-normal;
-
-  &:hover {
-    border-color: $border-light;
-    transform: translateY(-2px);
-  }
-
-  &__icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 8px;
-    background-color: rgba(0, 102, 255, 0.1);
-    color: $color-primary;
+  &__categories-list {
     display: flex;
     align-items: center;
-    justify-content: center;
-    margin-bottom: 0.25rem;
+    gap: 0.6rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: $border-color transparent;
+
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: $border-color;
+      border-radius: 4px;
+    }
   }
 
-  &__title {
-    font-family: $font-heading;
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: $text-white;
-  }
-
-  &__desc {
-    font-size: 0.875rem;
-    line-height: 1.55;
+  &__category-chip {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid $border-color;
     color: $text-secondary;
+    padding: 0.5rem 1.1rem;
+    border-radius: 9999px;
+    font-size: 0.84rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all $transition-fast;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+      color: $text-white;
+      border-color: $border-light;
+    }
+
+    &--active {
+      background-color: $color-primary;
+      border-color: $color-primary;
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 0 16px rgba(0, 102, 255, 0.35);
+
+      &:hover {
+        background-color: color-mix(in srgb, $color-primary 90%, white);
+      }
+    }
   }
 }
 
 // ----------------------------------------
-// Product Catalog
+// 3. Listed Products Section (One by one)
 // ----------------------------------------
-.nex-catalog {
-  padding: 5rem 2rem;
+.nex-store-products {
+  padding: 3rem 2rem 5rem;
 
   @include tablet {
-    padding: 3.5rem 1.25rem;
+    padding: 2rem 1.25rem 4rem;
   }
 
   &__container {
@@ -273,67 +222,18 @@
 
   &__header {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: space-between;
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
-
-    @include tablet {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-  }
-
-  &__titles {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
-
-  &__eyebrow {
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: $color-primary;
+    margin-bottom: 2rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   &__heading {
     font-family: $font-heading;
-    font-size: 2rem;
+    font-size: 1.35rem;
     font-weight: 700;
-    letter-spacing: -0.03em;
     color: $text-white;
-
-    @include mobile {
-      font-size: 1.6rem;
-    }
-  }
-
-  &__search-box {
-    position: relative;
-    width: 320px;
-
-    @include tablet {
-      width: 100%;
-    }
-  }
-
-  &__search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: $text-muted;
-    pointer-events: none;
-  }
-
-  &__search-input {
-    @include modern-input;
-    height: 42px;
-    padding-left: 2.4rem;
-    font-size: 0.85rem;
-    border-radius: 8px;
   }
 
   &__grid {
@@ -391,7 +291,7 @@
 
 // Skeleton Loading
 .nex-skeleton-card {
-  height: 340px;
+  height: 360px;
   background: linear-gradient(90deg, #121418 25%, #1a1c22 50%, #121418 75%);
   background-size: 200% 100%;
   animation: skeletonPulse 1.5s infinite;

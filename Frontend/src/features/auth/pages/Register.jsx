@@ -84,7 +84,7 @@ const Register = () => {
         if (userRole === "seller" || formData.isSeller) {
           navigate("/seller/dashboard");
         } else {
-          navigate("/");
+          navigate("/home");
         }
       }
     } catch {
