@@ -11,16 +11,16 @@ const cartSchema = new mongoose.Schema({
         {
             product: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: "product",
+                ref: "Product",
                 required: true
             },
             variant: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: "product.variants",
             },
             quantity: {
                 type: Number,
-                min: 1
+                min: 1,
+                default: 1
             },
             price: {
                 type: priceSchema,
@@ -28,7 +28,7 @@ const cartSchema = new mongoose.Schema({
             }
         }
     ]
-})
+}, { timestamps: true });
 
 const cartModel = mongoose.model('cart', cartSchema);
 
