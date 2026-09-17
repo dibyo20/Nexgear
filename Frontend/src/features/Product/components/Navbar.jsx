@@ -1,11 +1,13 @@
 import React from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/hook/useAuth.js";
-import { BoxIcon, PlusIcon, LogoutIcon, UserIcon } from "./Icons.jsx";
+import { useCart } from "../../cart/hooks/useCart.js";
+import { BoxIcon, PlusIcon, LogoutIcon, UserIcon, CartIcon } from "./Icons.jsx";
 import "../styles/Navbar.scss";
 
 export const Navbar = () => {
   const { user, handleLogout } = useAuth();
+  const { cartCount } = useCart();
   const navigate = useNavigate();
 
   const onLogout = async () => {
@@ -47,8 +49,23 @@ export const Navbar = () => {
           </nav>
         )}
 
-        {/* Actions / Auth */}
+        {/* Actions / Auth / Cart */}
         <div className="nex-navbar__actions">
+          {/* Cart Icon Link */}
+          <NavLink
+            to="/cart"
+            className={({ isActive }) =>
+              `nex-navbar__cart-btn ${isActive ? "nex-navbar__cart-btn--active" : ""}`
+            }
+            title="Shopping Cart"
+            aria-label="Shopping Cart"
+          >
+            <CartIcon size={19} />
+            {cartCount > 0 && (
+              <span className="nex-cart-badge">{cartCount > 99 ? "99+" : cartCount}</span>
+            )}
+          </NavLink>
+
           {user ? (
             <div className="nex-navbar__user-menu">
               <div className="nex-navbar__user-info">

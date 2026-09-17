@@ -214,4 +214,49 @@
     height: 36px;
     border-radius: 6px;
   }
+
+  &__cart-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid $border-color;
+    color: $text-primary;
+    text-decoration: none;
+    transition: all $transition-fast;
+
+    &:hover {
+      background-color: $bg-card-hover;
+      border-color: $color-primary;
+      color: $color-primary;
+    }
+
+    &--active {
+      border-color: $color-primary;
+      color: $color-primary;
+    }
+
+    .nex-cart-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background-color: $color-primary;
+      color: $text-white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      border: 2px solid $bg-dark;
+      box-shadow: 0 0 8px $color-primary-glow;
+    }
+  }
 }

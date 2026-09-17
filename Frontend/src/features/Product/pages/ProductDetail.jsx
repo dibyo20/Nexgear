@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar.jsx";
 import Footer from "../components/Footer.jsx";
 import { useProduct } from "../hooks/useProduct.js";
 import { useAuth } from "../../auth/hook/useAuth.js";
+import { useCart } from "../../cart/hooks/useCart.js";
 import {
   ArrowLeftIcon,
   CartIcon,
@@ -12,7 +13,6 @@ import {
   SparklesIcon,
   BoxIcon,
 } from "../components/Icons.jsx";
-import axios from "axios";
 import "../styles/ProductDetail.scss";
 
 export const ProductDetail = () => {
@@ -20,6 +20,7 @@ export const ProductDetail = () => {
   const navigate = useNavigate();
   const { handleGetProductById, loading } = useProduct();
   const { user } = useAuth();
+  const { handleAddItem } = useCart();
 
   const [product, setProduct] = useState(null);
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
@@ -49,7 +50,6 @@ export const ProductDetail = () => {
   const variants = product?.variants || [];
   const activeVariant = variants[selectedVariantIndex] || null;
 
-  // Active pricing & stock
   const currentPrice =
     activeVariant?.price?.amount || product?.price?.amount || 0;
   const currentCurrency =
@@ -91,16 +91,16 @@ export const ProductDetail = () => {
     setCartSuccess(false);
 
     try {
-      await axios.post(
-        `/api/cart/${product._id}/${variantId}`,
-        { quantity },
-        { withCredentials: true }
-      );
+      await handleAddItem({
+        productId: product._id,
+        variantId,
+        quantity,
+      });
       setCartSuccess(true);
       setTimeout(() => setCartSuccess(false), 3000);
     } catch (err) {
       setCartError(
-        err?.response?.data?.message || "Failed to add item to cart. Try again."
+        err?.response?.data?.message || err.message || "Failed to add item to cart. Try again."
       );
     } finally {
       setCartLoading(false);
