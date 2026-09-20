@@ -37,10 +37,10 @@ export const addToCart = async (req, res) => {
             }
 
             await cartModel.findOneAndUpdate(
-                { 
-                    user: req.user._id, 
-                    "items.product": productId, 
-                    ...(variantId && variantId !== "default" ? { "items.variant": variantId } : {}) 
+                {
+                    user: req.user._id,
+                    "items.product": productId,
+                    ...(variantId && variantId !== "default" ? { "items.variant": variantId } : {})
                 },
                 { $inc: { "items.$.quantity": quantity } },
                 { new: true }
@@ -109,3 +109,51 @@ export const getCart = async (req, res) => {
         });
     }
 };
+
+export const incrementCartItemQuantity = async (req, res) => {
+    const { productId, variantId } = req.params;
+    const product = await productModel.findOne({
+        _id: productId,
+        "variants._id": variantId
+    })
+
+    if(!product) { 
+        return res.status(404).json({
+            message: "Product or variant not found",
+            success: false
+        })
+    }
+
+    
+    const cart = await cartModel.findOne({ user: req.user._id });
+    if(!cart) {
+        return res.status(404).json({
+            message: "Cart not found",
+            success: false
+        })
+    }
+    
+    const stock = stockOfVariant(productId, variantId);
+    const itemQuantityInCart = cart.items.find(item => item.product.toString() === productId && item.variant?.toString() === variantId)?.quantity || 0;
+
+    if(itemQuantityInCart + 1 > stock) {
+        return res.status(400).json({
+            message: `Only ${stock} items left in stock and you already have ${itemQuantityInCart} items in your cart.`,
+            success: false
+        });
+    }
+
+    await cartModel.findOneAndUpdate(
+        {user: req.user._id, "items.product": productId, "items.variant": variantId},
+        { $inc: { "items.$.quantity": 1 } },
+        { new: true }
+    );
+
+    const updatedCart = await cartModel.findOne({ user: req.user._id }).populate("items.product");
+
+    return res.status(200).json({
+        success: true,
+        message: "Item quantity incremented successfully",
+        cart: updatedCart
+    });
+}
