@@ -11,6 +11,7 @@ import {
   SparklesIcon,
   LockIcon,
   CheckIcon,
+  TrashIcon,
 } from "../../Product/components/Icons.jsx";
 import "../styles/CartPage.scss";
 
@@ -23,6 +24,8 @@ export const CartPage = () => {
     cartCount,
     cartTotal,
     handleGetCart,
+    handleIncreamentCartItem,
+    handleDecreamentCartItem,
     clearCartError,
   } = useCart();
 
@@ -30,6 +33,7 @@ export const CartPage = () => {
   const [appliedDiscount, setAppliedDiscount] = useState(null);
   const [promoError, setPromoError] = useState("");
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
+  const [updatingKey, setUpdatingKey] = useState(null);
 
   useEffect(() => {
     handleGetCart();
@@ -70,6 +74,30 @@ export const CartPage = () => {
     setTimeout(() => {
       setCheckoutSuccess(false);
     }, 4000);
+  };
+
+  const onIncrement = async (prodId, varId, itemKey) => {
+    if (updatingKey) return;
+    setUpdatingKey(itemKey);
+    try {
+      await handleIncreamentCartItem({ productId: prodId, variantId: varId });
+    } catch (err) {
+      // Error is tracked in Redux error state
+    } finally {
+      setUpdatingKey(null);
+    }
+  };
+
+  const onDecrement = async (prodId, varId, itemKey) => {
+    if (updatingKey) return;
+    setUpdatingKey(itemKey);
+    try {
+      await handleDecreamentCartItem({ productId: prodId, variantId: varId });
+    } catch (err) {
+      // Error is tracked in Redux error state
+    } finally {
+      setUpdatingKey(null);
+    }
   };
 
   return (
@@ -176,6 +204,7 @@ export const CartPage = () => {
                   "/assets/login-keyboard.jpg";
 
                 const itemKey = `${prodId}-${varId || idx}`;
+                const isItemUpdating = updatingKey === itemKey;
 
                 return (
                   <div key={itemKey} className="nex-cart-card">
@@ -206,8 +235,8 @@ export const CartPage = () => {
                         <div className="nex-cart-variant-badges">
                           {Object.entries(
                             variantObj.attributes instanceof Map
-                              ? Object.fromEntries(variantObj.attributes)
-                              : variantObj.attributes
+                            ? Object.fromEntries(variantObj.attributes)
+                            : variantObj.attributes
                           ).map(([k, v]) => (
                             <span key={k} className="nex-cart-spec-badge">
                               {k}: {String(v)}
@@ -221,18 +250,46 @@ export const CartPage = () => {
                       </div>
                     </div>
 
-                    {/* Quantity Display */}
+                    {/* Quantity Controls */}
                     <div className="nex-cart-qty-ctrl">
-                      <span className="nex-cart-qty-value" style={{ width: "auto", padding: "0 0.75rem" }}>
-                        Qty: {item.quantity || 1}
+                      <button
+                        type="button"
+                        onClick={() => onDecrement(prodId, varId, itemKey)}
+                        disabled={loading || isItemUpdating}
+                        aria-label={item.quantity <= 1 ? "Remove item" : "Decrease quantity"}
+                        title={item.quantity <= 1 ? "Remove item" : "Decrease quantity"}
+                      >
+                        {item.quantity <= 1 ? <TrashIcon size={14} /> : "−"}
+                      </button>
+                      <span className="nex-cart-qty-value">
+                        {item.quantity || 1}
                       </span>
+                      <button
+                        type="button"
+                        onClick={() => onIncrement(prodId, varId, itemKey)}
+                        disabled={loading || isItemUpdating}
+                        aria-label="Increase quantity"
+                        title="Increase quantity"
+                      >
+                        +
+                      </button>
                     </div>
 
-                    {/* Line Total */}
+                    {/* Line Total & Remove Action */}
                     <div className="nex-cart-actions-col">
                       <div className="nex-cart-item-total">
                         {formatPrice(lineTotal, currency)}
                       </div>
+                      <button
+                        type="button"
+                        className="nex-cart-remove-btn"
+                        onClick={() => onDecrement(prodId, varId, itemKey)}
+                        disabled={loading || isItemUpdating}
+                        title="Remove item"
+                        aria-label="Remove item"
+                      >
+                        <TrashIcon size={16} />
+                      </button>
                     </div>
                   </div>
                 );

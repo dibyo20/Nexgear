@@ -49,12 +49,16 @@ export const useCart = () => {
     }
   }
 
-  async function handleIncrementCartItem({ productId, variantId }) {
+  async function handleIncreamentCartItem({ productId, variantId }) {
     dispatch(setLoading(true));
     dispatch(clearError());
     try {
-      const data = await incrementCartItemAPI({ productId, variantId });
-      dispatch(incrementCartItem({ productId, variantId }));
+      const data = await increamentCartItemAPI({ productId, variantId });
+      if (data?.cart?.items) {
+        dispatch(setItems(data.cart.items));
+      } else {
+        dispatch(incrementCartItem({ productId, variantId }));
+      }
       return data;
     } catch (err) {
       dispatch(setError(err?.response?.data?.message || err.message));
@@ -64,13 +68,16 @@ export const useCart = () => {
     }
   }
 
-
-  async function handleDecrementCartItem({ productId, variantId }) {
+  async function handleDecreamentCartItem({ productId, variantId }) {
     dispatch(setLoading(true));
     dispatch(clearError());
     try {
-      const data = await decrementCartItemAPI({ productId, variantId });
-      dispatch(decrementCartItem({ productId, variantId }));
+      const data = await decreamentCartItemAPI({ productId, variantId });
+      if (data?.cart?.items) {
+        dispatch(setItems(data.cart.items));
+      } else {
+        dispatch(decrementCartItem({ productId, variantId }));
+      }
       return data;
     } catch (err) {
       dispatch(setError(err?.response?.data?.message || err.message));
@@ -79,7 +86,6 @@ export const useCart = () => {
       dispatch(setLoading(false));
     }
   }
-
 
   const clearCartError = () => {
     dispatch(clearError());
@@ -99,6 +105,8 @@ export const useCart = () => {
     cartTotal,
     handleAddItem,
     handleGetCart,
+    handleIncreamentCartItem,
+    handleDecreamentCartItem,
     clearCartError,
   };
 };
