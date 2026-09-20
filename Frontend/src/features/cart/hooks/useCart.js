@@ -5,8 +5,10 @@ import {
   setLoading,
   setError,
   clearError,
+  incrementCartItem,
+  decrementCartItem,
 } from "../state/cart.slice.js";
-import { addItem as addItemApi, getCart as getCartApi } from "../service/cart.api.js";
+import { addItem as addItemApi, getCart as getCartApi, increamentCartItemAPI, decreamentCartItemAPI } from "../service/cart.api.js";
 
 export const useCart = () => {
   const dispatch = useDispatch();
@@ -41,11 +43,43 @@ export const useCart = () => {
       return data;
     } catch (err) {
       dispatch(setError(err?.response?.data?.message || err.message));
-      return null;
+      throw err;
     } finally {
       dispatch(setLoading(false));
     }
   }
+
+  async function handleIncrementCartItem({ productId, variantId }) {
+    dispatch(setLoading(true));
+    dispatch(clearError());
+    try {
+      const data = await incrementCartItemAPI({ productId, variantId });
+      dispatch(incrementCartItem({ productId, variantId }));
+      return data;
+    } catch (err) {
+      dispatch(setError(err?.response?.data?.message || err.message));
+      throw err;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+
+
+  async function handleDecrementCartItem({ productId, variantId }) {
+    dispatch(setLoading(true));
+    dispatch(clearError());
+    try {
+      const data = await decrementCartItemAPI({ productId, variantId });
+      dispatch(decrementCartItem({ productId, variantId }));
+      return data;
+    } catch (err) {
+      dispatch(setError(err?.response?.data?.message || err.message));
+      throw err;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+
 
   const clearCartError = () => {
     dispatch(clearError());
