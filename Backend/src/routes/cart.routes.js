@@ -1,7 +1,7 @@
 import express from 'express';
 import { authenticateUser } from '../middlewares/auth.middleware.js';
-import { addToCart, getCart, incrementCartItemQuantity } from '../controllers/cart.controller.js';
-import { validateAddToCart, validateIncrementCartItemQuantity } from '../validator/cart.validator.js';
+import { addToCart, getCart, incrementCartItemQuantity, decrementCartItemQuantity } from '../controllers/cart.controller.js';
+import { validateAddToCart, validateIncrementCartItemQuantity, validateDecrementCartItemQuantity } from '../validator/cart.validator.js';
 
 const router = express.Router();
 
@@ -32,5 +32,14 @@ router.get('/', getCart);
  * @argument variantId - ID of the variant of the product to be incremented in the cart
  */
 router.post('/quantity/increment/:productId/:variantId', validateIncrementCartItemQuantity, incrementCartItemQuantity);
+
+/**
+ * @route POST /api/cart/quantity/decrement/:productId/:variantId
+ * @description Decrement the quantity of a product in the cart
+ * @access Private
+ * @argument productId - ID of the product to be decremented in the cart
+ * @argument variantId - ID of the variant of the product to be decremented in the cart
+ */
+router.post('/quantity/decrement/:productId/:variantId', validateDecrementCartItemQuantity, decrementCartItemQuantity);
 
 export default router;
