@@ -22,12 +22,12 @@ export const validateAddToCart = [
 
 export const validateIncrementCartItemQuantity = [
     param("productId").isMongoId().withMessage("Invalid product ID"),
-    param("variantId").optional().isMongoId().withMessage("Invalid variant ID"),
+    param("variantId").optional().custom((val) => !val || val === "default" || /^[0-9a-fA-F]{24}$/.test(val)).withMessage("Invalid variant ID"),
     validateRequest
 ]
 
 export const validateDecrementCartItemQuantity = [
     param("productId").isMongoId().withMessage("Invalid product ID"),
-    param("variantId").optional().isMongoId().withMessage("Invalid variant ID"),
+    param("variantId").optional().custom((val) => !val || val === "default" || /^[0-9a-fA-F]{24}$/.test(val)).withMessage("Invalid variant ID"),
     validateRequest
 ]

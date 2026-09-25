@@ -216,7 +216,7 @@ export const ProductDetail = () => {
               <p className="nex-info__desc">{product.description}</p>
 
               {/* Variant Selector */}
-              {variants.length > 0 && (
+              {variants.length > 0 ? (
                 <div className="nex-variants-section">
                   <label className="nex-variants-label">
                     Select Configuration ({variants.length} options)
@@ -250,6 +250,22 @@ export const ProductDetail = () => {
                         </button>
                       );
                     })}
+                  </div>
+                </div>
+              ) : (
+                <div className="nex-variants-section">
+                  <label className="nex-variants-label">Configuration</label>
+                  <div className="nex-variants-grid">
+                    <button
+                      type="button"
+                      className="nex-variant-btn is-selected"
+                      style={{ cursor: "default" }}
+                    >
+                      <span className="nex-variant-name">Standard Base Edition</span>
+                      <span className="nex-variant-price">
+                        {formatPrice(currentPrice, currentCurrency)}
+                      </span>
+                    </button>
                   </div>
                 </div>
               )}

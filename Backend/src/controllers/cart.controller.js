@@ -40,7 +40,9 @@ export const addToCart = async (req, res) => {
                 {
                     user: req.user._id,
                     "items.product": productId,
-                    ...(variantId && variantId !== "default" ? { "items.variant": variantId } : {})
+                    ...(variantId && variantId !== "default"
+                        ? { "items.variant": variantId }
+                        : { "items.variant": { $in: [null, undefined] } })
                 },
                 { $inc: { "items.$.quantity": quantity } },
                 { new: true }
@@ -113,10 +115,14 @@ export const getCart = async (req, res) => {
 export const incrementCartItemQuantity = async (req, res) => {
     try {
         const { productId, variantId } = req.params;
-        const product = await productModel.findOne({
-            _id: productId,
-            "variants._id": variantId
-        });
+        const isDefault = !variantId || variantId === "default";
+
+        const product = isDefault
+            ? await productModel.findById(productId)
+            : await productModel.findOne({
+                _id: productId,
+                "variants._id": variantId
+            });
 
         if(!product) { 
             return res.status(404).json({
@@ -134,7 +140,10 @@ export const incrementCartItemQuantity = async (req, res) => {
         }
         
         const stock = (await stockOfVariant(productId, variantId)) ?? 10;
-        const itemQuantityInCart = cart.items.find(item => item.product.toString() === productId && item.variant?.toString() === variantId)?.quantity || 0;
+        const itemQuantityInCart = cart.items.find(item => 
+            item.product.toString() === productId && 
+            (item.variant?.toString() === variantId || (!item.variant && isDefault))
+        )?.quantity || 0;
 
         if(itemQuantityInCart + 1 > stock) {
             return res.status(400).json({
@@ -143,8 +152,16 @@ export const incrementCartItemQuantity = async (req, res) => {
             });
         }
 
+        const query = {
+            user: req.user._id,
+            "items.product": productId,
+            ...(isDefault
+                ? { "items.variant": { $in: [null, undefined] } }
+                : { "items.variant": variantId })
+        };
+
         await cartModel.findOneAndUpdate(
-            {user: req.user._id, "items.product": productId, "items.variant": variantId},
+            query,
             { $inc: { "items.$.quantity": 1 } },
             { new: true }
         );
@@ -168,11 +185,14 @@ export const incrementCartItemQuantity = async (req, res) => {
 export const decrementCartItemQuantity = async (req, res) => {
     try {
         const { productId, variantId } = req.params;
+        const isDefault = !variantId || variantId === "default";
 
-        const product = await productModel.findOne({
-            _id: productId,
-            "variants._id": variantId
-        });
+        const product = isDefault
+            ? await productModel.findById(productId)
+            : await productModel.findOne({
+                _id: productId,
+                "variants._id": variantId
+            });
 
         if (!product) {
             return res.status(404).json({
@@ -191,7 +211,8 @@ export const decrementCartItemQuantity = async (req, res) => {
         }
 
         const itemInCart = cart.items.find(
-            item => item.product.toString() === productId && item.variant?.toString() === variantId
+            item => item.product.toString() === productId && 
+            (item.variant?.toString() === variantId || (!item.variant && isDefault))
         );
 
         if (!itemInCart) {
@@ -202,14 +223,30 @@ export const decrementCartItemQuantity = async (req, res) => {
         }
 
         if (itemInCart.quantity <= 1) {
-            await cartModel.findOneAndUpdate(
-                { user: req.user._id },
-                { $pull: { items: { product: productId, variant: variantId } } },
-                { new: true }
-            );
+            if (isDefault) {
+                await cartModel.findOneAndUpdate(
+                    { user: req.user._id },
+                    { $pull: { items: { product: productId, variant: { $in: [null, undefined] } } } },
+                    { new: true }
+                );
+            } else {
+                await cartModel.findOneAndUpdate(
+                    { user: req.user._id },
+                    { $pull: { items: { product: productId, variant: variantId } } },
+                    { new: true }
+                );
+            }
         } else {
+            const query = {
+                user: req.user._id,
+                "items.product": productId,
+                ...(isDefault
+                    ? { "items.variant": { $in: [null, undefined] } }
+                    : { "items.variant": variantId })
+            };
+
             await cartModel.findOneAndUpdate(
-                { user: req.user._id, "items.product": productId, "items.variant": variantId },
+                query,
                 { $inc: { "items.$.quantity": -1 } },
                 { new: true }
             );

@@ -9,6 +9,7 @@ import {
   CheckIcon,
   SparklesIcon,
   BoxIcon,
+  LayersIcon,
   UploadIcon,
   ExternalLinkIcon,
 } from "../components/Icons.jsx";
@@ -303,9 +304,9 @@ export const SellerProductDetails = () => {
             ) : (
               <div className="nex-seller-variants-empty">
                 <LayersIcon size={36} />
-                <h3>No variants configured</h3>
+                <h3>Active as Base Instrument (Default)</h3>
                 <p>
-                  Add customizable colorways, switch variations, or plate materials for this product.
+                  This product is currently available to buyers in its standard base configuration. You can optionally configure specialized colorways, switch variations, or plate materials below.
                 </p>
                 <button
                   type="button"
@@ -313,7 +314,7 @@ export const SellerProductDetails = () => {
                   onClick={() => setShowAddModal(true)}
                 >
                   <PlusIcon size={16} />
-                  <span>Configure First Variant</span>
+                  <span>Add Custom Variant</span>
                 </button>
               </div>
             )}

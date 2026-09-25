@@ -25,11 +25,12 @@ const cartSlice = createSlice({
         },
         incrementCartItem: (state, action) => {
             const { productId, variantId } = action.payload;
+            const targetVariantId = variantId ? String(variantId) : "default";
 
             state.items = state.items.map(item => {
                 const itemProductId = item.product?._id ? String(item.product._id) : String(item.product);
-                const itemVariantId = item.variant?._id ? String(item.variant._id) : String(item.variant);
-                if (itemProductId === String(productId) && itemVariantId === String(variantId)) {
+                const itemVariantId = item.variant?._id ? String(item.variant._id) : (item.variant ? String(item.variant) : "default");
+                if (itemProductId === String(productId) && itemVariantId === targetVariantId) {
                     return {
                         ...item,
                         quantity: (Number(item.quantity) || 0) + 1
@@ -41,12 +42,13 @@ const cartSlice = createSlice({
         },
         decrementCartItem: (state, action) => {
             const { productId, variantId } = action.payload;
+            const targetVariantId = variantId ? String(variantId) : "default";
 
             state.items = state.items
                 .map(item => {
                     const itemProductId = item.product?._id ? String(item.product._id) : String(item.product);
-                    const itemVariantId = item.variant?._id ? String(item.variant._id) : String(item.variant);
-                    if (itemProductId === String(productId) && itemVariantId === String(variantId)) {
+                    const itemVariantId = item.variant?._id ? String(item.variant._id) : (item.variant ? String(item.variant) : "default");
+                    if (itemProductId === String(productId) && itemVariantId === targetVariantId) {
                         return {
                             ...item,
                             quantity: (Number(item.quantity) || 1) - 1

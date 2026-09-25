@@ -80,7 +80,7 @@ export const CartPage = () => {
     if (updatingKey) return;
     setUpdatingKey(itemKey);
     try {
-      await handleIncreamentCartItem({ productId: prodId, variantId: varId });
+      await handleIncreamentCartItem({ productId: prodId, variantId: varId || "default" });
     } catch (err) {
       // Error is tracked in Redux error state
     } finally {
@@ -92,7 +92,7 @@ export const CartPage = () => {
     if (updatingKey) return;
     setUpdatingKey(itemKey);
     try {
-      await handleDecreamentCartItem({ productId: prodId, variantId: varId });
+      await handleDecreamentCartItem({ productId: prodId, variantId: varId || "default" });
     } catch (err) {
       // Error is tracked in Redux error state
     } finally {
@@ -231,7 +231,7 @@ export const CartPage = () => {
                       </Link>
 
                       {/* Variant attribute badges */}
-                      {variantObj?.attributes && (
+                      {variantObj?.attributes && Object.keys(variantObj.attributes instanceof Map ? Object.fromEntries(variantObj.attributes) : variantObj.attributes).length > 0 ? (
                         <div className="nex-cart-variant-badges">
                           {Object.entries(
                             variantObj.attributes instanceof Map
@@ -242,6 +242,10 @@ export const CartPage = () => {
                               {k}: {String(v)}
                             </span>
                           ))}
+                        </div>
+                      ) : (
+                        <div className="nex-cart-variant-badges">
+                          <span className="nex-cart-spec-badge">Standard Base Edition</span>
                         </div>
                       )}
 
