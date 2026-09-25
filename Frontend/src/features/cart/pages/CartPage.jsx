@@ -23,6 +23,7 @@ export const CartPage = () => {
     error,
     cartCount,
     cartTotal,
+    cartSavings = 0,
     handleGetCart,
     handleIncreamentCartItem,
     handleDecreamentCartItem,
@@ -182,18 +183,30 @@ export const CartPage = () => {
                   );
                 }
 
-                // Pricing calculation
-                const unitPrice =
-                  item.price?.amount ||
-                  variantObj?.price?.amount ||
-                  prod.price?.amount ||
-                  0;
+                // Historical / snapshot price when added to cart
+                const originalUnitPrice = Number(item.price?.amount) || 0;
+
+                // Live current seller price from product or variant
+                const currentUnitPrice = Number(
+                  variantObj?.price?.amount ?? prod.price?.amount ?? originalUnitPrice
+                ) || 0;
+
                 const currency =
-                  item.price?.currency ||
                   variantObj?.price?.currency ||
                   prod.price?.currency ||
+                  item.price?.currency ||
                   "INR";
-                const lineTotal = unitPrice * (item.quantity || 1);
+
+                const quantity = Number(item.quantity) || 1;
+                const lineTotal = currentUnitPrice * quantity;
+
+                // Savings and price change analysis
+                const hasSavings = originalUnitPrice > currentUnitPrice && currentUnitPrice > 0;
+                const unitSavings = hasSavings ? originalUnitPrice - currentUnitPrice : 0;
+                const totalItemSavings = unitSavings * quantity;
+
+                const isPriceIncreased = currentUnitPrice > originalUnitPrice && originalUnitPrice > 0;
+                const priceIncreaseDiff = isPriceIncreased ? currentUnitPrice - originalUnitPrice : 0;
 
                 // Image handling
                 const itemImg =
@@ -249,8 +262,69 @@ export const CartPage = () => {
                         </div>
                       )}
 
-                      <div className="nex-cart-unit-price">
-                        {formatPrice(unitPrice, currency)} each
+                      {/* Dynamic Price Display */}
+                      <div className="nex-cart-price-block">
+                        <div className="nex-cart-unit-price">
+                          <span className="nex-cart-price-lbl">Unit Price: </span>
+                          {hasSavings ? (
+                            <>
+                              <span className="nex-cart-old-price">
+                                {formatPrice(originalUnitPrice, currency)}
+                              </span>
+                              <span className="nex-cart-current-price live-drop">
+                                {formatPrice(currentUnitPrice, currency)}
+                              </span>
+                            </>
+                          ) : isPriceIncreased ? (
+                            <>
+                              <span className="nex-cart-current-price live-increase">
+                                {formatPrice(currentUnitPrice, currency)}
+                              </span>
+                              <span className="nex-cart-bump-pill">
+                                Updated (+{formatPrice(priceIncreaseDiff, currency)})
+                              </span>
+                            </>
+                          ) : (
+                            <span className="nex-cart-current-price">
+                              {formatPrice(currentUnitPrice, currency)}
+                            </span>
+                          )}
+                          <span className="nex-cart-each-lbl"> each</span>
+                        </div>
+
+                        {/* Price drop savings banner */}
+                        {hasSavings && (
+                          <div className="nex-cart-savings-banner">
+                            <span>
+                              You can buy it for{" "}
+                              <strong className="deal-buy-price">
+                                {formatPrice(currentUnitPrice, currency)}
+                              </strong>{" "}
+                              and you can save{" "}
+                              <strong className="deal-save-price">
+                                {formatPrice(unitSavings, currency)}
+                              </strong>
+                            </span>
+                            {quantity > 1 && (
+                              <span className="nex-cart-total-savings-tag">
+                                (Save {formatPrice(totalItemSavings, currency)} total)
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Price increase notice */}
+                        {isPriceIncreased && (
+                          <div className="nex-cart-notice-banner">
+                            <span>
+                              [Notice] Seller updated price from{" "}
+                              <span className="strike">
+                                {formatPrice(originalUnitPrice, currency)}
+                              </span>{" "}
+                              to {formatPrice(currentUnitPrice, currency)}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -307,9 +381,16 @@ export const CartPage = () => {
 
                 <div className="nex-summary-rows">
                   <div className="nex-summary-row">
-                    <span>Subtotal</span>
+                    <span>Hardware Subtotal</span>
                     <span className="val">{formatPrice(cartTotal)}</span>
                   </div>
+
+                  {cartSavings > 0 && (
+                    <div className="nex-summary-row nex-summary-row--savings">
+                      <span className="savings-lbl">Seller Price Drop Savings</span>
+                      <span className="val savings">-{formatPrice(cartSavings)}</span>
+                    </div>
+                  )}
 
                   <div className="nex-summary-row">
                     <span>Express Dispatch</span>

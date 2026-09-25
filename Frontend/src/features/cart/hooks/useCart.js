@@ -92,9 +92,42 @@ export const useCart = () => {
   };
 
   const cartCount = items.reduce((acc, item) => acc + (item.quantity || 1), 0);
+
   const cartTotal = items.reduce((acc, item) => {
-    const itemPrice = item.price?.amount || item.product?.price?.amount || 0;
-    return acc + itemPrice * (item.quantity || 1);
+    const prod = item.product;
+    const varId = item.variant?._id || item.variant;
+    let livePrice = null;
+    if (prod && typeof prod === "object") {
+      if (prod.variants && varId) {
+        const v = prod.variants.find((v) => v._id?.toString() === varId.toString());
+        if (v?.price?.amount !== undefined) livePrice = Number(v.price.amount);
+      }
+      if (livePrice === null && prod.price?.amount !== undefined) {
+        livePrice = Number(prod.price.amount);
+      }
+    }
+    const finalPrice = livePrice !== null ? livePrice : (Number(item.price?.amount) || 0);
+    return acc + finalPrice * (item.quantity || 1);
+  }, 0);
+
+  const cartSavings = items.reduce((acc, item) => {
+    const prod = item.product;
+    const varId = item.variant?._id || item.variant;
+    let livePrice = null;
+    if (prod && typeof prod === "object") {
+      if (prod.variants && varId) {
+        const v = prod.variants.find((v) => v._id?.toString() === varId.toString());
+        if (v?.price?.amount !== undefined) livePrice = Number(v.price.amount);
+      }
+      if (livePrice === null && prod.price?.amount !== undefined) {
+        livePrice = Number(prod.price.amount);
+      }
+    }
+    const origPrice = Number(item.price?.amount) || 0;
+    if (livePrice !== null && origPrice > livePrice && livePrice > 0) {
+      return acc + (origPrice - livePrice) * (item.quantity || 1);
+    }
+    return acc;
   }, 0);
 
   return {
@@ -103,6 +136,7 @@ export const useCart = () => {
     error,
     cartCount,
     cartTotal,
+    cartSavings,
     handleAddItem,
     handleGetCart,
     handleIncreamentCartItem,
