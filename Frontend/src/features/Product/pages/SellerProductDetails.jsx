@@ -12,6 +12,7 @@ import {
   LayersIcon,
   UploadIcon,
   ExternalLinkIcon,
+  TrashIcon,
 } from "../components/Icons.jsx";
 import "../styles/SellerProductDetails.scss";
 
@@ -35,10 +36,27 @@ export const SellerProductDetails = () => {
     switchType: "",
     plate: "",
   });
+  const [customConfigs, setCustomConfigs] = useState([]);
   const [variantFiles, setVariantFiles] = useState([]);
   const [variantPreviews, setVariantPreviews] = useState([]);
   const [localMsg, setLocalMsg] = useState({ error: "", success: "" });
   const [submitting, setSubmitting] = useState(false);
+
+  const handleAddCustomConfig = () => {
+    setCustomConfigs((prev) => [...prev, { key: "", value: "" }]);
+  };
+
+  const handleCustomConfigChange = (index, field, value) => {
+    setCustomConfigs((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
+
+  const handleRemoveCustomConfig = (index) => {
+    setCustomConfigs((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const fetchProduct = async () => {
     const res = await handleGetProductById(id);
@@ -98,6 +116,14 @@ export const SellerProductDetails = () => {
     if (variantForm.switchType.trim()) attributes.switch = variantForm.switchType.trim();
     if (variantForm.plate.trim()) attributes.plate = variantForm.plate.trim();
 
+    customConfigs.forEach((cfg) => {
+      const k = cfg.key.trim();
+      const v = cfg.value.trim();
+      if (k && v) {
+        attributes[k] = v;
+      }
+    });
+
     setSubmitting(true);
 
     const formData = new FormData();
@@ -121,6 +147,7 @@ export const SellerProductDetails = () => {
       setShowAddModal(false);
       setVariantFiles([]);
       setVariantPreviews([]);
+      setCustomConfigs([]);
       fetchProduct();
     } else {
       setLocalMsg({
@@ -337,97 +364,164 @@ export const SellerProductDetails = () => {
               </header>
 
               <form onSubmit={handleAddVariantSubmit} className="nex-modal-form">
-                <div className="nex-form-row">
-                  <div className="nex-form-group flex-2">
-                    <label className="nex-form-label">Price Amount</label>
-                    <input
-                      type="number"
-                      name="priceAmount"
-                      value={variantForm.priceAmount}
-                      onChange={handleInputChange}
-                      placeholder="e.g. 15999"
-                      min="1"
-                      className="nex-form-input"
-                      required
-                    />
-                  </div>
-
-                  <div className="nex-form-group flex-1">
-                    <label className="nex-form-label">Stock Units</label>
-                    <input
-                      type="number"
-                      name="stock"
-                      value={variantForm.stock}
-                      onChange={handleInputChange}
-                      min="0"
-                      className="nex-form-input"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Attributes */}
-                <div className="nex-form-group">
-                  <label className="nex-form-label">Color / Finish</label>
-                  <input
-                    type="text"
-                    name="color"
-                    value={variantForm.color}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Midnight Obsidian / Nebula Anodized"
-                    className="nex-form-input"
-                  />
-                </div>
-
-                <div className="nex-form-group">
-                  <label className="nex-form-label">Pre-installed Switches</label>
-                  <input
-                    type="text"
-                    name="switchType"
-                    value={variantForm.switchType}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Gateron Oil King Linear (Lubed)"
-                    className="nex-form-input"
-                  />
-                </div>
-
-                <div className="nex-form-group">
-                  <label className="nex-form-label">Plate / Mounting</label>
-                  <input
-                    type="text"
-                    name="plate"
-                    value={variantForm.plate}
-                    onChange={handleInputChange}
-                    placeholder="e.g. FR4 Plate / Gasket Silicone"
-                    className="nex-form-input"
-                  />
-                </div>
-
-                {/* Images */}
-                <div className="nex-form-group">
-                  <label className="nex-form-label">Variant Image (Optional)</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="nex-form-input"
-                  />
-                  {variantPreviews.length > 0 && (
-                    <div className="nex-preview-grid">
-                      {variantPreviews.map((url, i) => (
-                        <div key={i} className="nex-preview-item">
-                          <img src={url} alt={`Preview ${i + 1}`} />
-                          <button
-                            type="button"
-                            className="nex-preview-remove"
-                            onClick={() => handleRemoveFile(i)}
-                          >
-                            &times;
-                          </button>
-                        </div>
-                      ))}
+                <div className="nex-modal-body">
+                  <div className="nex-form-row">
+                    <div className="nex-form-group flex-2">
+                      <label className="nex-form-label">Price Amount</label>
+                      <input
+                        type="number"
+                        name="priceAmount"
+                        value={variantForm.priceAmount}
+                        onChange={handleInputChange}
+                        placeholder="e.g. 15999"
+                        min="1"
+                        className="nex-form-input"
+                        required
+                      />
                     </div>
-                  )}
+
+                    <div className="nex-form-group flex-1">
+                      <label className="nex-form-label">Stock Units</label>
+                      <input
+                        type="number"
+                        name="stock"
+                        value={variantForm.stock}
+                        onChange={handleInputChange}
+                        min="0"
+                        className="nex-form-input"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Attributes */}
+                  <div className="nex-form-group">
+                    <label className="nex-form-label">Color / Finish</label>
+                    <input
+                      type="text"
+                      name="color"
+                      value={variantForm.color}
+                      onChange={handleInputChange}
+                      placeholder="e.g. Midnight Obsidian / Nebula Anodized"
+                      className="nex-form-input"
+                    />
+                  </div>
+
+                  <div className="nex-form-group">
+                    <label className="nex-form-label">Pre-installed Switches</label>
+                    <input
+                      type="text"
+                      name="switchType"
+                      value={variantForm.switchType}
+                      onChange={handleInputChange}
+                      placeholder="e.g. Gateron Oil King Linear (Lubed)"
+                      className="nex-form-input"
+                    />
+                  </div>
+
+                  <div className="nex-form-group">
+                    <label className="nex-form-label">Plate / Mounting</label>
+                    <input
+                      type="text"
+                      name="plate"
+                      value={variantForm.plate}
+                      onChange={handleInputChange}
+                      placeholder="e.g. FR4 Plate / Gasket Silicone"
+                      className="nex-form-input"
+                    />
+                  </div>
+
+                  {/* Dynamic Custom Configurations */}
+                  <div className="nex-custom-configs-section">
+                    <div className="nex-custom-configs-header">
+                      <div>
+                        <label className="nex-form-label">
+                          Custom Specifications
+                        </label>
+                        <span className="nex-custom-configs-sub">
+                          Add any extra specs (e.g. Connectivity, DPI, Battery)
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        className="nex-btn-add-config"
+                        onClick={handleAddCustomConfig}
+                      >
+                        <PlusIcon size={14} />
+                        <span>Add Specification</span>
+                      </button>
+                    </div>
+
+                    {customConfigs.length > 0 && (
+                      <div className="nex-custom-configs-list">
+                        {customConfigs.map((cfg, idx) => (
+                          <div key={idx} className="nex-custom-config-row">
+                            <input
+                              type="text"
+                              placeholder="Spec Name (e.g. Connectivity, DPI)"
+                              value={cfg.key}
+                              onChange={(e) =>
+                                handleCustomConfigChange(
+                                  idx,
+                                  "key",
+                                  e.target.value
+                                )
+                              }
+                              className="nex-form-input nex-config-key"
+                            />
+                            <input
+                              type="text"
+                              placeholder="Spec Value (e.g. Tri-Mode Wireless, 30K)"
+                              value={cfg.value}
+                              onChange={(e) =>
+                                handleCustomConfigChange(
+                                  idx,
+                                  "value",
+                                  e.target.value
+                                )
+                              }
+                              className="nex-form-input nex-config-val"
+                            />
+                            <button
+                              type="button"
+                              className="nex-btn-remove-config"
+                              onClick={() => handleRemoveCustomConfig(idx)}
+                              title="Remove specification"
+                            >
+                              <TrashIcon size={15} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Images */}
+                  <div className="nex-form-group">
+                    <label className="nex-form-label">Variant Image (Optional)</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="nex-form-input"
+                    />
+                    {variantPreviews.length > 0 && (
+                      <div className="nex-preview-grid">
+                        {variantPreviews.map((url, i) => (
+                          <div key={i} className="nex-preview-item">
+                            <img src={url} alt={`Preview ${i + 1}`} />
+                            <button
+                              type="button"
+                              className="nex-preview-remove"
+                              onClick={() => handleRemoveFile(i)}
+                            >
+                              &times;
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="nex-modal-actions">

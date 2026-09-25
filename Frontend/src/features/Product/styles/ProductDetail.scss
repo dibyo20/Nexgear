@@ -218,7 +218,7 @@
 
 .nex-variants-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 0.75rem;
 }
 
@@ -226,11 +226,11 @@
   background-color: $bg-input;
   border: 1px solid $border-color;
   border-radius: 8px;
-  padding: 0.75rem;
+  padding: 0.65rem 0.85rem;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.3rem;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
   cursor: pointer;
   text-align: left;
   transition: all $transition-fast;
@@ -251,9 +251,38 @@
     }
   }
 
+  .nex-variant-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .nex-variant-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
   .nex-variant-name {
     font-size: 0.84rem;
     color: $text-primary;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .nex-variant-price {
@@ -263,13 +292,13 @@
   }
 }
 
-// Spec Pills
-.nex-spec-pills {
+// Structured Specifications Box (Matches Image 2)
+.nex-specs-box {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 0.5rem;
   background-color: rgba(255, 255, 255, 0.02);
-  border: 1px solid $border-color;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   padding: 0.75rem;
 
@@ -278,23 +307,27 @@
   }
 }
 
-.nex-spec-pill {
-  display: inline-flex;
-  gap: 0.35rem;
-  font-size: 0.78rem;
-  background-color: $bg-surface;
-  padding: 0.3rem 0.6rem;
-  border-radius: 4px;
+.nex-spec-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.84rem;
+  line-height: 1.4;
 
   .nex-spec-key {
-    color: $text-muted;
-    text-transform: capitalize;
+    color: $text-secondary;
+    font-weight: 500;
+    flex-shrink: 0;
   }
 
   .nex-spec-val {
     color: $text-white;
-    font-weight: 500;
+    font-weight: 600;
+    word-break: break-word;
   }
 }
 

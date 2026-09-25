@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 import Footer from "../components/Footer.jsx";
@@ -23,7 +23,7 @@ export const ProductDetail = () => {
   const { handleAddItem } = useCart();
 
   const [product, setProduct] = useState(null);
-  const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
+  const [selectedConfigIndex, setSelectedConfigIndex] = useState(0);
   const [activeImage, setActiveImage] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [cartLoading, setCartLoading] = useState(false);
@@ -36,6 +36,7 @@ export const ProductDetail = () => {
       if (res.success && res.data?.product) {
         const prod = res.data.product;
         setProduct(prod);
+        setSelectedConfigIndex(0);
 
         const initialImg =
           prod.images?.[0]?.url ||
@@ -47,15 +48,142 @@ export const ProductDetail = () => {
     loadProduct();
   }, [id]);
 
-  const variants = product?.variants || [];
-  const activeVariant = variants[selectedVariantIndex] || null;
+  // Aggregate base product model and any extra deployed variants
+  const allConfigurations = useMemo(() => {
+    if (!product) return [];
+
+    const list = [];
+    const rawVariants = product.variants || [];
+
+    // Intelligently infer color/edition from product title / description
+    let baseLabel = "Standard Base Model";
+    const textToCheck = `${product.title || ""} ${product.description || ""}`.toLowerCase();
+
+    // Check if any added variant specifically has "white" or other color
+    const hasWhiteVariant = rawVariants.some((v) => {
+      const attrs =
+        v.attributes instanceof Map
+          ? Object.fromEntries(v.attributes)
+          : typeof v.attributes === "string"
+          ? JSON.parse(v.attributes || "{}")
+          : v.attributes || {};
+      return String(attrs.color || "").toLowerCase().includes("white");
+    });
+
+    if (textToCheck.includes("black")) {
+      baseLabel = "Black - Standard";
+    } else if (textToCheck.includes("white") && !hasWhiteVariant) {
+      baseLabel = "White - Standard";
+    } else if (textToCheck.includes("silver")) {
+      baseLabel = "Silver - Standard";
+    } else if (hasWhiteVariant) {
+      baseLabel = "Black - Standard";
+    }
+
+    // Default inferred specifications for the base configuration
+    const baseAttrs = {
+      Color: baseLabel,
+      Switch: textToCheck.includes("optical")
+        ? "Optical Switches Gen-3 - Standard Edition"
+        : "Standard High-Performance Switches",
+      Plate: textToCheck.includes("sensor")
+        ? "Focus Pro 30K Optical Sensor Platform"
+        : "Standard Reinforced Platform",
+      Warranty: "2-Year Nexgear Replacement Warranty",
+    };
+
+    // 1. Add Base Configuration (Always selectable as default)
+    list.push({
+      _id: "default",
+      isBase: true,
+      displayName: baseLabel,
+      attributes: baseAttrs,
+      images: product.images || [],
+      price: product.price,
+      stock: 10,
+    });
+
+    // 2. Add extra deployed variants created by seller
+    rawVariants.forEach((v, idx) => {
+      let attrs = {};
+      if (v.attributes) {
+        if (v.attributes instanceof Map) {
+          attrs = Object.fromEntries(v.attributes);
+        } else if (typeof v.attributes === "string") {
+          try {
+            attrs = JSON.parse(v.attributes);
+          } catch {
+            attrs = { Spec: v.attributes };
+          }
+        } else {
+          attrs = v.attributes;
+        }
+      }
+
+      // Display name for variant button (e.g. "White-RZ01-04620200-R3A1")
+      let vLabel = "";
+      if (attrs.color) {
+        vLabel = attrs.color;
+      } else if (attrs.name) {
+        vLabel = attrs.name;
+      } else if (attrs.edition) {
+        vLabel = attrs.edition;
+      } else {
+        const firstEntry = Object.entries(attrs)[0];
+        if (firstEntry) {
+          vLabel = `${firstEntry[0]}: ${firstEntry[1]}`;
+        } else {
+          vLabel = `Variant #${idx + 1}`;
+        }
+      }
+
+      list.push({
+        ...v,
+        _id: v._id || `variant-${idx}`,
+        isBase: false,
+        displayName: vLabel,
+        attributes: attrs,
+        images: v.images && v.images.length > 0 ? v.images : product.images || [],
+        price: v.price || product.price,
+        stock: v.stock !== undefined ? v.stock : 10,
+      });
+    });
+
+    return list;
+  }, [product]);
+
+  const activeConfig = useMemo(() => {
+    if (allConfigurations.length === 0) return null;
+    return allConfigurations[selectedConfigIndex] || allConfigurations[0];
+  }, [allConfigurations, selectedConfigIndex]);
+
+  // Dynamically resolve image gallery based on active configuration
+  const currentImages = useMemo(() => {
+    if (!product) return [];
+
+    if (activeConfig?.images && activeConfig.images.length > 0) {
+      const configImgs = activeConfig.images
+        .map((img) => img?.url || img)
+        .filter(Boolean);
+      if (configImgs.length > 0) return configImgs;
+    }
+
+    if (product.images && product.images.length > 0) {
+      const baseImgs = product.images
+        .map((img) => img?.url || img)
+        .filter(Boolean);
+      if (baseImgs.length > 0) return baseImgs;
+    }
+
+    return [];
+  }, [product, activeConfig]);
 
   const currentPrice =
-    activeVariant?.price?.amount || product?.price?.amount || 0;
+    activeConfig?.price?.amount || product?.price?.amount || 0;
   const currentCurrency =
-    activeVariant?.price?.currency || product?.price?.currency || "INR";
+    activeConfig?.price?.currency || product?.price?.currency || "INR";
   const currentStock =
-    activeVariant?.stock !== undefined ? activeVariant.stock : 10;
+    activeConfig?.stock !== undefined ? activeConfig.stock : 10;
 
   const formatPrice = (amount, currency) => {
     return new Intl.NumberFormat("en-IN", {
@@ -66,10 +194,16 @@ export const ProductDetail = () => {
   };
 
   const handleVariantSelect = (idx) => {
-    setSelectedVariantIndex(idx);
-    const variant = variants[idx];
-    if (variant?.images?.[0]?.url) {
-      setActiveImage(variant.images[0].url);
+    setSelectedConfigIndex(idx);
+    const targetConfig = allConfigurations[idx];
+    if (targetConfig) {
+      const targetImg =
+        targetConfig.images?.[0]?.url ||
+        targetConfig.images?.[0] ||
+        product?.images?.[0]?.url ||
+        product?.images?.[0] ||
+        "/assets/login-keyboard.jpg";
+      setActiveImage(targetImg);
     }
   };
 
@@ -79,12 +213,14 @@ export const ProductDetail = () => {
       return;
     }
 
-    if (variants.length > 0 && !activeVariant?._id) {
-      setCartError("Please select a valid variant.");
+    if (!activeConfig) {
+      setCartError("Please select a valid configuration.");
       return;
     }
 
-    const variantId = activeVariant?._id || "default";
+    const variantId = activeConfig.isBase
+      ? "default"
+      : activeConfig._id || "default";
 
     setCartLoading(true);
     setCartError("");
@@ -100,7 +236,9 @@ export const ProductDetail = () => {
       setTimeout(() => setCartSuccess(false), 3000);
     } catch (err) {
       setCartError(
-        err?.response?.data?.message || err.message || "Failed to add item to cart. Try again."
+        err?.response?.data?.message ||
+          err.message ||
+          "Failed to add item to cart. Try again."
       );
     } finally {
       setCartLoading(false);
@@ -166,21 +304,18 @@ export const ProductDetail = () => {
 
               {/* Thumbnails */}
               <div className="nex-gallery__thumbs">
-                {product.images?.map((img, i) => {
-                  const url = img.url || img;
-                  return (
-                    <button
-                      key={i}
-                      type="button"
-                      className={`nex-gallery__thumb ${
-                        activeImage === url ? "is-active" : ""
-                      }`}
-                      onClick={() => setActiveImage(url)}
-                    >
-                      <img src={url} alt={`Preview ${i + 1}`} />
-                    </button>
-                  );
-                })}
+                {currentImages.map((imgUrl, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    className={`nex-gallery__thumb ${
+                      activeImage === imgUrl ? "is-active" : ""
+                    }`}
+                    onClick={() => setActiveImage(imgUrl)}
+                  >
+                    <img src={imgUrl} alt={`Preview ${i + 1}`} />
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -215,69 +350,65 @@ export const ProductDetail = () => {
 
               <p className="nex-info__desc">{product.description}</p>
 
-              {/* Variant Selector */}
-              {variants.length > 0 ? (
+              {/* Configuration Selector */}
+              {allConfigurations.length > 0 && (
                 <div className="nex-variants-section">
                   <label className="nex-variants-label">
-                    Select Configuration ({variants.length} options)
+                    Select Configuration ({allConfigurations.length}{" "}
+                    {allConfigurations.length === 1 ? "Option" : "Options"})
                   </label>
                   <div className="nex-variants-grid">
-                    {variants.map((variant, idx) => {
-                      const isSelected = selectedVariantIndex === idx;
+                    {allConfigurations.map((config, idx) => {
+                      const isSelected = selectedConfigIndex === idx;
                       const vPrice =
-                        variant.price?.amount || product.price.amount;
+                        config.price?.amount || product.price?.amount || 0;
                       const vCurrency =
-                        variant.price?.currency || product.price.currency;
-                      const attrName =
-                        variant.attributes?.name ||
-                        variant.attributes?.color ||
-                        variant.attributes?.edition ||
-                        `Edition #${idx + 1}`;
+                        config.price?.currency || product.price?.currency || "INR";
+                      const thumbImg =
+                        config.images?.[0]?.url ||
+                        config.images?.[0] ||
+                        product.images?.[0]?.url ||
+                        product.images?.[0];
 
                       return (
                         <button
-                          key={variant._id || idx}
+                          key={config._id || idx}
                           type="button"
                           className={`nex-variant-btn ${
                             isSelected ? "is-selected" : ""
                           }`}
                           onClick={() => handleVariantSelect(idx)}
                         >
-                          <span className="nex-variant-name">{attrName}</span>
-                          <span className="nex-variant-price">
-                            {formatPrice(vPrice, vCurrency)}
-                          </span>
+                          {thumbImg && (
+                            <div className="nex-variant-thumb">
+                              <img src={thumbImg} alt={config.displayName} />
+                            </div>
+                          )}
+                          <div className="nex-variant-meta">
+                            <span className="nex-variant-name">
+                              {config.displayName}
+                            </span>
+                            <span className="nex-variant-price">
+                              {formatPrice(vPrice, vCurrency)}
+                            </span>
+                          </div>
                         </button>
                       );
                     })}
                   </div>
                 </div>
-              ) : (
-                <div className="nex-variants-section">
-                  <label className="nex-variants-label">Configuration</label>
-                  <div className="nex-variants-grid">
-                    <button
-                      type="button"
-                      className="nex-variant-btn is-selected"
-                      style={{ cursor: "default" }}
-                    >
-                      <span className="nex-variant-name">Standard Base Edition</span>
-                      <span className="nex-variant-price">
-                        {formatPrice(currentPrice, currentCurrency)}
-                      </span>
-                    </button>
-                  </div>
-                </div>
               )}
 
-              {/* Attributes Specifications Pill Grid */}
-              {activeVariant?.attributes &&
-                Object.keys(activeVariant.attributes).length > 0 && (
-                  <div className="nex-spec-pills">
-                    {Object.entries(activeVariant.attributes).map(
+              {/* Attributes Specifications Box */}
+              {activeConfig?.attributes &&
+                Object.keys(activeConfig.attributes).length > 0 && (
+                  <div className="nex-specs-box">
+                    {Object.entries(activeConfig.attributes).map(
                       ([key, val]) => (
-                        <div key={key} className="nex-spec-pill">
-                          <span className="nex-spec-key">{key}:</span>
+                        <div key={key} className="nex-spec-row">
+                          <span className="nex-spec-key">
+                            {key.charAt(0).toUpperCase() + key.slice(1)}:
+                          </span>
                           <span className="nex-spec-val">{String(val)}</span>
                         </div>
                       )
