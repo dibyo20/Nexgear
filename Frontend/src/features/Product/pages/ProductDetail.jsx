@@ -55,42 +55,27 @@ export const ProductDetail = () => {
     const list = [];
     const rawVariants = product.variants || [];
 
-    // Intelligently infer color/edition from product title / description
-    let baseLabel = "Standard Base Model";
-    const textToCheck = `${product.title || ""} ${product.description || ""}`.toLowerCase();
-
-    // Check if any added variant specifically has "white" or other color
-    const hasWhiteVariant = rawVariants.some((v) => {
-      const attrs =
-        v.attributes instanceof Map
-          ? Object.fromEntries(v.attributes)
-          : typeof v.attributes === "string"
-          ? JSON.parse(v.attributes || "{}")
-          : v.attributes || {};
-      return String(attrs.color || "").toLowerCase().includes("white");
-    });
-
-    if (textToCheck.includes("black")) {
-      baseLabel = "Black - Standard";
-    } else if (textToCheck.includes("white") && !hasWhiteVariant) {
-      baseLabel = "White - Standard";
-    } else if (textToCheck.includes("silver")) {
-      baseLabel = "Silver - Standard";
-    } else if (hasWhiteVariant) {
-      baseLabel = "Black - Standard";
+    // Base attributes: directly from database if present, otherwise empty
+    let baseAttrs = {};
+    if (product.attributes) {
+      if (product.attributes instanceof Map) {
+        baseAttrs = Object.fromEntries(product.attributes);
+      } else if (typeof product.attributes === "string") {
+        try {
+          baseAttrs = JSON.parse(product.attributes);
+        } catch {
+          baseAttrs = {};
+        }
+      } else if (typeof product.attributes === "object") {
+        baseAttrs = product.attributes;
+      }
     }
 
-    // Default inferred specifications for the base configuration
-    const baseAttrs = {
-      Color: baseLabel,
-      Switch: textToCheck.includes("optical")
-        ? "Optical Switches Gen-3 - Standard Edition"
-        : "Standard High-Performance Switches",
-      Plate: textToCheck.includes("sensor")
-        ? "Focus Pro 30K Optical Sensor Platform"
-        : "Standard Reinforced Platform",
-      Warranty: "2-Year Nexgear Replacement Warranty",
-    };
+    const baseLabel =
+      baseAttrs.name ||
+      baseAttrs.color ||
+      baseAttrs.edition ||
+      "Base Model";
 
     // 1. Add Base Configuration (Always selectable as default)
     list.push({
@@ -113,14 +98,14 @@ export const ProductDetail = () => {
           try {
             attrs = JSON.parse(v.attributes);
           } catch {
-            attrs = { Spec: v.attributes };
+            attrs = {};
           }
-        } else {
+        } else if (typeof v.attributes === "object") {
           attrs = v.attributes;
         }
       }
 
-      // Display name for variant button (e.g. "White-RZ01-04620200-R3A1")
+      // Display name for variant button (purely from seller's attributes)
       let vLabel = "";
       if (attrs.color) {
         vLabel = attrs.color;
