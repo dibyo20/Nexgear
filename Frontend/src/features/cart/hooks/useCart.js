@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import {
   addItem as addItemToCart,
-  setItems,
+  setCart,
   setLoading,
   setError,
   clearError,
@@ -12,9 +12,13 @@ import { addItem as addItemApi, getCart as getCartApi, increamentCartItemAPI, de
 
 export const useCart = () => {
   const dispatch = useDispatch();
-  const { items = [], loading = false, error = null } = useSelector(
-    (state) => state.cart || {}
-  );
+  const {
+    items = [],
+    totalPrice = null,
+    currency = null,
+    loading = false,
+    error = null,
+  } = useSelector((state) => state.cart || {});
 
   async function handleAddItem({ productId, variantId, quantity = 1 }) {
     dispatch(setLoading(true));
@@ -37,8 +41,8 @@ export const useCart = () => {
     dispatch(clearError());
     try {
       const data = await getCartApi();
-      if (data?.cart?.items) {
-        dispatch(setItems(data.cart.items));
+      if (data?.cart) {
+        dispatch(setCart(data.cart));
       }
       return data;
     } catch (err) {
@@ -54,8 +58,8 @@ export const useCart = () => {
     dispatch(clearError());
     try {
       const data = await increamentCartItemAPI({ productId, variantId });
-      if (data?.cart?.items) {
-        dispatch(setItems(data.cart.items));
+      if (data?.cart) {
+        dispatch(setCart(data.cart));
       } else {
         dispatch(incrementCartItem({ productId, variantId }));
       }
@@ -73,8 +77,8 @@ export const useCart = () => {
     dispatch(clearError());
     try {
       const data = await decreamentCartItemAPI({ productId, variantId });
-      if (data?.cart?.items) {
-        dispatch(setItems(data.cart.items));
+      if (data?.cart) {
+        dispatch(setCart(data.cart));
       } else {
         dispatch(decrementCartItem({ productId, variantId }));
       }
@@ -93,7 +97,7 @@ export const useCart = () => {
 
   const cartCount = items.reduce((acc, item) => acc + (item.quantity || 1), 0);
 
-  const cartTotal = items.reduce((acc, item) => {
+  const fallbackTotal = items.reduce((acc, item) => {
     const prod = item.product;
     const varId = item.variant?._id || item.variant;
     let livePrice = null;
@@ -109,6 +113,8 @@ export const useCart = () => {
     const finalPrice = livePrice !== null ? livePrice : (Number(item.price?.amount) || 0);
     return acc + finalPrice * (item.quantity || 1);
   }, 0);
+
+  const cartTotal = totalPrice !== null && totalPrice !== undefined ? totalPrice : fallbackTotal;
 
   const cartSavings = items.reduce((acc, item) => {
     const prod = item.product;
@@ -132,6 +138,8 @@ export const useCart = () => {
 
   return {
     items,
+    totalPrice,
+    currency,
     loading,
     error,
     cartCount,
