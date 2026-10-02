@@ -4,14 +4,13 @@ import Navbar from "../../Product/components/Navbar.jsx";
 import Footer from "../../Product/components/Footer.jsx";
 import { useCart } from "../hooks/useCart.js";
 import { useAuth } from "../../auth/hook/useAuth.js";
+import CartItem from "../components/CartItem.jsx";
+import CartSummary from "../components/CartSummary.jsx";
+import PaymentSuccessModal from "../components/PaymentSuccessModal.jsx";
+import { loadRazorpayScript } from "../utils/razorpay.js";
 import {
   CartIcon,
   ArrowRightIcon,
-  ShieldIcon,
-  SparklesIcon,
-  LockIcon,
-  CheckIcon,
-  TrashIcon,
 } from "../../Product/components/Icons.jsx";
 import "../styles/CartPage.scss";
 
@@ -27,6 +26,8 @@ export const CartPage = () => {
     handleGetCart,
     handleIncreamentCartItem,
     handleDecreamentCartItem,
+    handleCreatePaymentOrder,
+    handleVerifyPaymentOrder,
     clearCartError,
   } = useCart();
 
@@ -34,6 +35,10 @@ export const CartPage = () => {
   const [appliedDiscount, setAppliedDiscount] = useState(null);
   const [promoError, setPromoError] = useState("");
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState(null);
+  const [paymentSuccessDetails, setPaymentSuccessDetails] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [updatingKey, setUpdatingKey] = useState(null);
 
   useEffect(() => {
@@ -45,7 +50,7 @@ export const CartPage = () => {
       style: "currency",
       currency: currency === "INR" ? "INR" : "USD",
       maximumFractionDigits: 0,
-    }).format(amount);
+    }).format(amount || 0);
   };
 
   const handleApplyPromo = (e) => {
@@ -70,11 +75,107 @@ export const CartPage = () => {
     : 0;
   const finalTotal = Math.max(0, cartTotal - discountAmount);
 
-  const handleProceedToCheckout = () => {
-    setCheckoutSuccess(true);
-    setTimeout(() => {
-      setCheckoutSuccess(false);
-    }, 4000);
+  const handleProceedToCheckout = async () => {
+    if (items.length === 0 || isProcessingPayment) return;
+
+    setPaymentError(null);
+    setIsProcessingPayment(true);
+
+    try {
+      // 1. Ensure Razorpay checkout script is loaded
+      const isScriptLoaded = await loadRazorpayScript();
+      if (!isScriptLoaded || !window.Razorpay) {
+        throw new Error("Razorpay SDK failed to load. Please check your internet connection.");
+      }
+
+      // 2. Fetch Razorpay key ID from Vite environment variable
+      const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+      if (!razorpayKey) {
+        throw new Error("Payment gateway configuration missing (VITE_RAZORPAY_KEY_ID).");
+      }
+
+      // 3. Create order on backend
+      const orderResponse = await handleCreatePaymentOrder();
+      if (!orderResponse?.order?.id) {
+        throw new Error(orderResponse?.message || "Failed to initialize payment order.");
+      }
+
+      const order = orderResponse.order;
+
+      // 4. Configure Razorpay checkout options
+      const options = {
+        key: razorpayKey,
+        amount: order.amount,
+        currency: order.currency || "INR",
+        name: "Nexgear Studio",
+        description: "Custom Mechanical Hardware & Instruments",
+        image: "/nexgear-logo.svg",
+        order_id: order.id,
+        handler: async function (response) {
+          try {
+            setIsProcessingPayment(true);
+            const verifyRes = await handleVerifyPaymentOrder({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+
+            setPaymentSuccessDetails({
+              orderId: response.razorpay_order_id,
+              paymentId: response.razorpay_payment_id,
+              amount: (order.amount || 0) / 100,
+              currency: order.currency || "INR",
+            });
+            setShowSuccessModal(true);
+            setCheckoutSuccess(true);
+          } catch (err) {
+            console.error("Payment verification failed:", err);
+            setPaymentError(
+              err?.response?.data?.message ||
+              err?.message ||
+              "Payment verification failed. Please contact support."
+            );
+          } finally {
+            setIsProcessingPayment(false);
+          }
+        },
+        prefill: {
+          name: user?.fullname || user?.name || "",
+          email: user?.email || "",
+          contact: user?.contact || user?.phone || "",
+        },
+        theme: {
+          color: "#0066ff",
+          backdrop_color: "#08090b",
+        },
+        modal: {
+          ondismiss: function () {
+            setIsProcessingPayment(false);
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", function (response) {
+        console.error("Razorpay Payment Failed:", response.error);
+        setIsProcessingPayment(false);
+        setPaymentError(
+          response.error?.description ||
+          response.error?.reason ||
+          "Payment transaction could not be completed."
+        );
+      });
+
+      rzp.open();
+    } catch (err) {
+      console.error("Error during checkout:", err);
+      setIsProcessingPayment(false);
+      setPaymentError(
+        err?.response?.data?.message ||
+        err?.message ||
+        "Could not initiate checkout process."
+      );
+    }
   };
 
   const onIncrement = async (prodId, varId, itemKey) => {
@@ -127,12 +228,15 @@ export const CartPage = () => {
         </div>
 
         {/* Global Error Banner */}
-        {error && (
+        {(error || paymentError) && (
           <div className="nex-cart-error-toast" role="alert">
-            <span>{error}</span>
+            <span>{paymentError || error}</span>
             <button
               type="button"
-              onClick={clearCartError}
+              onClick={() => {
+                clearCartError();
+                setPaymentError(null);
+              }}
               aria-label="Dismiss error"
             >
               &times;
@@ -141,7 +245,7 @@ export const CartPage = () => {
         )}
 
         {/* Empty State vs Loaded Cart */}
-        {items.length === 0 ? (
+        {items.length === 0 && !showSuccessModal ? (
           <div className="nex-empty-cart">
             <div className="nex-empty-icon-halo">
               <CartIcon size={40} />
@@ -153,7 +257,7 @@ export const CartPage = () => {
             </p>
             <div className="nex-empty-actions">
               <Link
-                to="/home"
+                to="/"
                 className="nex-btn-checkout"
                 style={{ textDecoration: "none" }}
               >
@@ -174,334 +278,53 @@ export const CartPage = () => {
                 const prod = item.product || {};
                 const prodId = prod._id || prod;
                 const varId = item.variant?._id || item.variant;
-
-                // Find variant details from populated product
-                let variantObj = null;
-                if (prod.variants && varId) {
-                  variantObj = prod.variants.find(
-                    (v) => v._id?.toString() === varId.toString()
-                  );
-                }
-
-                // Historical / snapshot price when added to cart
-                const originalUnitPrice = Number(item.price?.amount) || 0;
-
-                // Live current seller price from product or variant
-                const currentUnitPrice = Number(
-                  variantObj?.price?.amount ?? prod.price?.amount ?? originalUnitPrice
-                ) || 0;
-
-                const currency =
-                  variantObj?.price?.currency ||
-                  prod.price?.currency ||
-                  item.price?.currency ||
-                  "INR";
-
-                const quantity = Number(item.quantity) || 1;
-                const lineTotal = currentUnitPrice * quantity;
-
-                // Savings and price change analysis
-                const hasSavings = originalUnitPrice > currentUnitPrice && currentUnitPrice > 0;
-                const unitSavings = hasSavings ? originalUnitPrice - currentUnitPrice : 0;
-                const totalItemSavings = unitSavings * quantity;
-
-                const isPriceIncreased = currentUnitPrice > originalUnitPrice && originalUnitPrice > 0;
-                const priceIncreaseDiff = isPriceIncreased ? currentUnitPrice - originalUnitPrice : 0;
-
-                // Image handling
-                const itemImg =
-                  variantObj?.images?.[0]?.url ||
-                  variantObj?.images?.[0] ||
-                  prod.images?.[0]?.url ||
-                  prod.images?.[0] ||
-                  "/assets/login-keyboard.jpg";
-
                 const itemKey = `${prodId}-${varId || idx}`;
-                const isItemUpdating = updatingKey === itemKey;
 
                 return (
-                  <div key={itemKey} className="nex-cart-card">
-                    {/* Thumbnail */}
-                    <div className="nex-cart-thumb">
-                      <Link to={`/products/${prodId}`}>
-                        <img
-                          src={itemImg}
-                          alt={prod.title || "Nexgear Product"}
-                          onError={(e) => {
-                            e.currentTarget.src = "/assets/login-keyboard.jpg";
-                          }}
-                        />
-                      </Link>
-                    </div>
-
-                    {/* Product & Variant Details */}
-                    <div className="nex-cart-info">
-                      <Link
-                        to={`/products/${prodId}`}
-                        className="nex-cart-item-title"
-                      >
-                        {prod.title || "Custom Mechanical Instrument"}
-                      </Link>
-
-                      {/* Variant attribute badges */}
-                      {variantObj?.attributes && Object.keys(variantObj.attributes instanceof Map ? Object.fromEntries(variantObj.attributes) : variantObj.attributes).length > 0 ? (
-                        <div className="nex-cart-variant-badges">
-                          {Object.entries(
-                            variantObj.attributes instanceof Map
-                            ? Object.fromEntries(variantObj.attributes)
-                            : variantObj.attributes
-                          ).map(([k, v]) => (
-                            <span key={k} className="nex-cart-spec-badge">
-                              {k}: {String(v)}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="nex-cart-variant-badges">
-                          <span className="nex-cart-spec-badge">Standard Base Edition</span>
-                        </div>
-                      )}
-
-                      {/* Dynamic Price Display */}
-                      <div className="nex-cart-price-block">
-                        <div className="nex-cart-unit-price">
-                          <span className="nex-cart-price-lbl">Unit Price: </span>
-                          {hasSavings ? (
-                            <>
-                              <span className="nex-cart-old-price">
-                                {formatPrice(originalUnitPrice, currency)}
-                              </span>
-                              <span className="nex-cart-current-price live-drop">
-                                {formatPrice(currentUnitPrice, currency)}
-                              </span>
-                            </>
-                          ) : isPriceIncreased ? (
-                            <>
-                              <span className="nex-cart-current-price live-increase">
-                                {formatPrice(currentUnitPrice, currency)}
-                              </span>
-                              <span className="nex-cart-bump-pill">
-                                Updated (+{formatPrice(priceIncreaseDiff, currency)})
-                              </span>
-                            </>
-                          ) : (
-                            <span className="nex-cart-current-price">
-                              {formatPrice(currentUnitPrice, currency)}
-                            </span>
-                          )}
-                          <span className="nex-cart-each-lbl"> each</span>
-                        </div>
-
-                        {/* Price drop savings banner */}
-                        {hasSavings && (
-                          <div className="nex-cart-savings-banner">
-                            <span>
-                              You can buy it for{" "}
-                              <strong className="deal-buy-price">
-                                {formatPrice(currentUnitPrice, currency)}
-                              </strong>{" "}
-                              and you can save{" "}
-                              <strong className="deal-save-price">
-                                {formatPrice(unitSavings, currency)}
-                              </strong>
-                            </span>
-                            {quantity > 1 && (
-                              <span className="nex-cart-total-savings-tag">
-                                (Save {formatPrice(totalItemSavings, currency)} total)
-                              </span>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Price increase notice */}
-                        {isPriceIncreased && (
-                          <div className="nex-cart-notice-banner">
-                            <span>
-                              [Notice] Seller updated price from{" "}
-                              <span className="strike">
-                                {formatPrice(originalUnitPrice, currency)}
-                              </span>{" "}
-                              to {formatPrice(currentUnitPrice, currency)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Quantity Controls */}
-                    <div className="nex-cart-qty-ctrl">
-                      <button
-                        type="button"
-                        onClick={() => onDecrement(prodId, varId, itemKey)}
-                        disabled={loading || isItemUpdating}
-                        aria-label={item.quantity <= 1 ? "Remove item" : "Decrease quantity"}
-                        title={item.quantity <= 1 ? "Remove item" : "Decrease quantity"}
-                      >
-                        {item.quantity <= 1 ? <TrashIcon size={14} /> : "−"}
-                      </button>
-                      <span className="nex-cart-qty-value">
-                        {item.quantity || 1}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => onIncrement(prodId, varId, itemKey)}
-                        disabled={loading || isItemUpdating}
-                        aria-label="Increase quantity"
-                        title="Increase quantity"
-                      >
-                        +
-                      </button>
-                    </div>
-
-                    {/* Line Total & Remove Action */}
-                    <div className="nex-cart-actions-col">
-                      <div className="nex-cart-item-total">
-                        {formatPrice(lineTotal, currency)}
-                      </div>
-                      <button
-                        type="button"
-                        className="nex-cart-remove-btn"
-                        onClick={() => onDecrement(prodId, varId, itemKey)}
-                        disabled={loading || isItemUpdating}
-                        title="Remove item"
-                        aria-label="Remove item"
-                      >
-                        <TrashIcon size={16} />
-                      </button>
-                    </div>
-                  </div>
+                  <CartItem
+                    key={itemKey}
+                    item={item}
+                    updatingKey={updatingKey}
+                    loading={loading}
+                    onIncrement={onIncrement}
+                    onDecrement={onDecrement}
+                    formatPrice={formatPrice}
+                  />
                 );
               })}
             </div>
 
             {/* Right Column: Order Summary */}
             <div className="nex-cart-summary-column">
-              <div className="nex-summary-card">
-                <h2 className="nex-summary-title">Order Summary</h2>
-
-                <div className="nex-summary-rows">
-                  <div className="nex-summary-row">
-                    <span>Hardware Subtotal</span>
-                    <span className="val">{formatPrice(cartTotal)}</span>
-                  </div>
-
-                  {cartSavings > 0 && (
-                    <div className="nex-summary-row nex-summary-row--savings">
-                      <span className="savings-lbl">Seller Price Drop Savings</span>
-                      <span className="val savings">-{formatPrice(cartSavings)}</span>
-                    </div>
-                  )}
-
-                  <div className="nex-summary-row">
-                    <span>Express Dispatch</span>
-                    <span className="val free">FREE</span>
-                  </div>
-
-                  <div className="nex-summary-row">
-                    <span>Taxes</span>
-                    <span className="val">Included</span>
-                  </div>
-
-                  {appliedDiscount && (
-                    <div className="nex-summary-row">
-                      <span>Discount ({appliedDiscount.code})</span>
-                      <span className="val discount">
-                        -{formatPrice(discountAmount)}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="nex-summary-divider" />
-
-                  <div className="nex-summary-row nex-summary-row--total">
-                    <span>Estimated Total</span>
-                    <span className="val-total">{formatPrice(finalTotal)}</span>
-                  </div>
-                </div>
-
-                {/* Promo Voucher */}
-                {appliedDiscount ? (
-                  <div className="nex-applied-voucher">
-                    <span>
-                      Voucher <strong>{appliedDiscount.code}</strong> applied (
-                      {appliedDiscount.percent}% OFF)
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setAppliedDiscount(null)}
-                      title="Remove coupon"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleApplyPromo} className="nex-promo-box">
-                    <input
-                      type="text"
-                      placeholder="PROMO CODE (e.g. NEXGEAR10)"
-                      value={promoCode}
-                      onChange={(e) => {
-                        setPromoCode(e.target.value);
-                        if (promoError) setPromoError("");
-                      }}
-                    />
-                    <button type="submit">Apply</button>
-                  </form>
-                )}
-
-                {promoError && (
-                  <div
-                    style={{
-                      color: "#ef4444",
-                      fontSize: "0.8rem",
-                      marginTop: "-0.5rem",
-                    }}
-                  >
-                    {promoError}
-                  </div>
-                )}
-
-                {/* Checkout CTA */}
-                <button
-                  type="button"
-                  className="nex-btn-checkout"
-                  onClick={handleProceedToCheckout}
-                  disabled={loading || items.length === 0}
-                >
-                  {checkoutSuccess ? (
-                    <>
-                      <CheckIcon size={18} />
-                      <span>Order Placed Successfully!</span>
-                    </>
-                  ) : (
-                    <>
-                      <LockIcon size={18} />
-                      <span>Proceed to Checkout</span>
-                      <ArrowRightIcon size={18} />
-                    </>
-                  )}
-                </button>
-
-                {/* Trust and Guarantee Bullet Points */}
-                <div className="nex-trust-bullets">
-                  <div className="nex-trust-bullet">
-                    <ShieldIcon size={16} />
-                    <span>2-Year Studio Hardware Warranty</span>
-                  </div>
-                  <div className="nex-trust-bullet">
-                    <SparklesIcon size={16} />
-                    <span>Quality Inspected & Acoustically Tested</span>
-                  </div>
-                  <div className="nex-trust-bullet">
-                    <LockIcon size={16} />
-                    <span>256-Bit Encrypted Secure Checkout</span>
-                  </div>
-                </div>
-              </div>
+              <CartSummary
+                cartTotal={cartTotal}
+                cartSavings={cartSavings}
+                finalTotal={finalTotal}
+                appliedDiscount={appliedDiscount}
+                discountAmount={discountAmount}
+                promoCode={promoCode}
+                setPromoCode={setPromoCode}
+                promoError={promoError}
+                handleApplyPromo={handleApplyPromo}
+                setAppliedDiscount={setAppliedDiscount}
+                handleProceedToCheckout={handleProceedToCheckout}
+                loading={loading}
+                isProcessingPayment={isProcessingPayment}
+                checkoutSuccess={checkoutSuccess}
+                formatPrice={formatPrice}
+                disabled={items.length === 0}
+              />
             </div>
           </div>
         )}
       </main>
+
+      {/* Payment Success Confirmation Modal */}
+      <PaymentSuccessModal
+        isOpen={showSuccessModal}
+        paymentDetails={paymentSuccessDetails}
+        onClose={() => setShowSuccessModal(false)}
+      />
 
       <Footer />
     </div>
