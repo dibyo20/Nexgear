@@ -240,12 +240,32 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.75rem;
+
+    @include tablet {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    @include mobile {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
   }
 
   &__loading-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.75rem;
+
+    @include tablet {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    @include mobile {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
   }
 
   &__empty {

@@ -265,6 +265,16 @@
   padding-top: 1.5rem;
   border-top: 1px solid $border-color;
   margin-top: 0.5rem;
+
+  @include mobile {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+
+    .nex-btn-cancel,
+    .nex-btn-submit-create {
+      width: 100%;
+    }
+  }
 }
 
 .nex-btn-cancel {

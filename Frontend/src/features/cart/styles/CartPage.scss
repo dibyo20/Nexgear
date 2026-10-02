@@ -159,10 +159,19 @@
     background: rgba(20, 23, 29, 0.85);
   }
 
-  @include mobile {
-    grid-template-columns: 80px 1fr;
+  @include laptop {
+    grid-template-columns: 90px 1fr auto auto;
     gap: 1rem;
+  }
+
+  @include mobile {
+    grid-template-columns: 75px 1fr;
+    grid-template-areas:
+      "thumb info"
+      "qty actions";
+    gap: 1rem 0.85rem;
     padding: 1rem;
+    align-items: start;
   }
 
   .nex-cart-thumb {
@@ -178,8 +187,9 @@
     flex-shrink: 0;
 
     @include mobile {
-      width: 80px;
-      height: 80px;
+      grid-area: thumb;
+      width: 75px;
+      height: 75px;
     }
 
     img {
@@ -199,6 +209,11 @@
     flex-direction: column;
     gap: 0.4rem;
 
+    @include mobile {
+      grid-area: info;
+      min-width: 0;
+    }
+
     .nex-cart-item-title {
       font-size: 1.05rem;
       font-weight: 600;
@@ -209,6 +224,10 @@
 
       &:hover {
         color: $color-primary;
+      }
+
+      @include mobile {
+        font-size: 0.95rem;
       }
     }
 
@@ -343,8 +362,9 @@
     overflow: hidden;
 
     @include mobile {
-      grid-column: 1 / -1;
+      grid-area: qty;
       justify-self: start;
+      align-self: center;
     }
 
     button {
@@ -390,9 +410,13 @@
     text-align: right;
 
     @include mobile {
-      grid-column: 2 / 3;
-      align-items: flex-end;
-      margin-top: -3.5rem;
+      grid-area: actions;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 0;
+      align-self: center;
     }
 
     .nex-cart-item-total {
@@ -400,6 +424,10 @@
       font-weight: 700;
       color: $text-white;
       font-family: $font-mono;
+
+      @include mobile {
+        font-size: 1.05rem;
+      }
     }
 
     .nex-cart-remove-btn {
@@ -729,6 +757,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  @include mobile {
+    padding: 1.75rem 1.25rem;
+  }
 }
 
 .nex-payment-success-icon {
@@ -775,6 +807,10 @@
   font-weight: 700;
   color: $text-white;
   margin-bottom: 0.5rem;
+
+  @include mobile {
+    font-size: 1.45rem;
+  }
 }
 
 .nex-payment-modal-subtitle {
@@ -783,6 +819,11 @@
   line-height: 1.5;
   margin-bottom: 1.75rem;
   max-width: 380px;
+
+  @include mobile {
+    font-size: 0.84rem;
+    margin-bottom: 1.25rem;
+  }
 }
 
 .nex-payment-info-box {
@@ -795,6 +836,11 @@
   flex-direction: column;
   gap: 0.75rem;
   margin-bottom: 1.25rem;
+
+  @include mobile {
+    padding: 0.85rem 1rem;
+    gap: 0.65rem;
+  }
 }
 
 .nex-payment-info-row {
@@ -802,22 +848,26 @@
   justify-content: space-between;
   align-items: center;
   font-size: 0.85rem;
+  gap: 0.5rem;
 
   .label {
     color: $text-muted;
+    flex-shrink: 0;
   }
 
   .value {
     color: $text-primary;
     font-weight: 500;
+    text-align: right;
 
     &.mono {
       font-family: $font-mono;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: $text-secondary;
       background: rgba(255, 255, 255, 0.05);
       padding: 0.15rem 0.45rem;
       border-radius: 4px;
+      word-break: break-all;
     }
 
     &.highlight {
