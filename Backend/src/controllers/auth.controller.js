@@ -2,6 +2,7 @@ import { config } from "../config/config.js";
 import userModel from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import redis from "../config/cache.js";
 
 async function sendTokenResponse(user, res, message) {
     const token = jwt.sign({ id: user._id }, config.JWT_SECRET, { expiresIn: "1d" });
@@ -99,6 +100,15 @@ export const login = async (req, res) => {
             return res.status(401).json({ message: "Invalid email or password" });
         }
 
+        const tokenCookie = req.cookies?.token;
+        if (tokenCookie) {
+            const blackListedToken = await redis.get(`blacklist:${tokenCookie}`);
+
+            if (blackListedToken) {
+                return res.status(401).json({ message: "Unauthorized (Token is blacklisted)" });
+            }
+        }
+
         await sendTokenResponse(user, res, "Login Successful");
     } catch (error) {
         return res.status(500).json({ message: "Server error" });
@@ -128,6 +138,22 @@ export const getMe = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
-    res.clearCookie("token");
-    res.status(200).json({ success: true, message: "Logged out successfully" });
-}
+    try {
+        const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+
+        if (!token) {
+            return res.status(400).json({ message: "Token not provided" });
+        }
+
+        res.clearCookie("token");
+
+        await redis.set(`blacklist:${token}`, "blacklisted", "EX", 24 * 60 * 60);
+
+        res.status(200).json({
+            message: "Logout Successfull",
+            token: token,
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Server error" });
+    }
+};
