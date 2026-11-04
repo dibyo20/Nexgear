@@ -1,9 +1,7 @@
 import Redis from "ioredis";
 import { config } from "./config.js";
 
-const redis = new Redis({
-    url: config.REDIS_URI
-});
+const redis = new Redis(config.REDIS_URI);
 
 redis.on("connect", () => {
     console.log("Connected to Redis");
