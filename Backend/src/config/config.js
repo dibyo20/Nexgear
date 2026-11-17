@@ -34,6 +34,10 @@ if (!process.env.REDIS_URI) {
     throw new Error("Please set your REDIS_URI environment variables")
 }
 
+if (!process.env.PORT) {
+    throw new Error("Please set your PORT environment variables");
+}
+
 export const config = {
     MONGO_URI: process.env.MONGO_URI,
     JWT_SECRET: process.env.JWT_SECRET,
@@ -44,4 +48,5 @@ export const config = {
     RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
     RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
     REDIS_URI: process.env.REDIS_URI,
+    PORT: process.env.PORT,
 };
