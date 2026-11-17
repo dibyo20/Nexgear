@@ -38,6 +38,10 @@ if (!process.env.PORT) {
     throw new Error("Please set your PORT environment variables");
 }
 
+if (!process.env.FRONTEND_URL) {
+    throw new Error("Please set your FRONTEND_URL environment variables");
+}
+
 export const config = {
     MONGO_URI: process.env.MONGO_URI,
     JWT_SECRET: process.env.JWT_SECRET,
@@ -49,4 +53,5 @@ export const config = {
     RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
     REDIS_URI: process.env.REDIS_URI,
     PORT: process.env.PORT,
+    FRONTEND_URL: process.env.FRONTEND_URL,
 };
