@@ -14,12 +14,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
-app.use(cors);
 
-const cors = {
-    origin: "http://localhost:5173" || config.FRONTEND_URL,
+app.use(cors({
+    origin: [
+        "http://localhost:5173",
+        config.FRONTEND_URL
+    ].filter(Boolean),
     credentials: true,
-}
+}));
 
 passport.use(new GoogleStrategy({
     clientID: config.GOOGLE_CLIENT_ID,
