@@ -6,6 +6,7 @@ import cartRouter from "./routes/cart.routes.js";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { config } from "./config/config.js";
+import cors from "cors";
 
 const app = express();
 
@@ -13,6 +14,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
+app.use(cors);
+
+const cors = {
+    origin: "http://localhost:5173" || config.FRONTEND_URL,
+    credentials: true,
+}
 
 passport.use(new GoogleStrategy({
     clientID: config.GOOGLE_CLIENT_ID,
