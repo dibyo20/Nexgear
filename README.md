@@ -271,6 +271,7 @@ Create a `.env` file inside `Backend/`:
 ```env
 PORT=5000
 NODE_ENV=development
+FRONTEND_URL=http://localhost:5173
 MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/nexgear?retryWrites=true&w=majority
 JWT_SECRET=your_super_secret_jwt_key
 GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
@@ -294,6 +295,9 @@ npm install
 Create a `.env` file inside `Frontend/`:
 ```env
 VITE_RAZORPAY_KEY_ID=rzp_test_xxxxxx
+# Leave blank in development to leverage Vite proxy (/api -> localhost:5000)
+# Set to your production backend URL (e.g. https://your-backend.onrender.com) in production
+VITE_API_URL=
 ```
 Start frontend:
 ```bash
@@ -305,32 +309,30 @@ Visit `http://localhost:5173` in your browser.
 
 ## 🚀 Production & Deployment Readiness Audit
 
-Before deploying to production (e.g. Frontend on **Vercel / Netlify** and Backend on **Render / AWS / Railway**), review this production checklist:
+The platform is fully architected and hardened for production deployment (e.g., Frontend on **Vercel / Netlify** and Backend on **Render / AWS / Railway**). The following critical production configurations are implemented across the codebase:
 
-### ⚠️ Critical Pre-Deployment Fixes Needed:
+### ✅ Production Best Practices Implemented:
 
-1. **Enable CORS Middleware in Express:**
-   - In development, Vite’s dev proxy forwards `/api` requests to `localhost:5000`, bypassing CORS.
-   - In production, cross-origin requests from your frontend domain will fail without CORS.
-   - **Fix:** Mount CORS in `Backend/src/app.js`:
+1. **CORS & Proxy Trust Configuration:**
+   - Mounted in `Backend/src/app.js`:
      ```javascript
-     import cors from "cors";
+     app.set("trust proxy", true);
      app.use(cors({
-         origin: process.env.CLIENT_URL || "https://your-frontend-domain.com",
+         origin: ["http://localhost:5173", config.FRONTEND_URL].filter(Boolean),
          credentials: true,
      }));
      ```
 
-2. **Frontend Axios Base URL Configuration:**
-   - In `Frontend/src/features/*/service/*.api.js`, endpoints use relative paths (`/api/auth`).
-   - In production builds on separate domains, configure dynamic baseURL:
+2. **Frontend Dynamic Axios Base URL:**
+   - In `Frontend/src/features/*/service/*.api.js` and `GoogleButton.jsx`, endpoints dynamically resolve the API base URL:
      ```javascript
-     baseURL: `${import.meta.env.VITE_API_BASE_URL || ''}/api/auth`
+     const API_BASE = import.meta.env.VITE_API_URL || '';
+     baseURL: `${API_BASE}/api/auth`
      ```
+   - In local development, leaving `VITE_API_URL` empty automatically leverages Vite's dev proxy. In production, set `VITE_API_URL=https://your-backend-domain.com`.
 
-3. **Cross-Site Cookie Policy:**
-   - When frontend and backend reside on different domains, cookies configured with `sameSite: "lax"` will be rejected by browsers on cross-site fetch calls.
-   - **Fix:** In production, use `sameSite: "none"` and `secure: true`:
+3. **Cross-Site Cookie Security:**
+   - In `Backend/src/controllers/auth.controller.js`, auth tokens sent via cookies use:
      ```javascript
      res.cookie("token", token, {
          httpOnly: true,
@@ -338,13 +340,24 @@ Before deploying to production (e.g. Frontend on **Vercel / Netlify** and Backen
          sameSite: config.NODE_ENV === "production" ? "none" : "lax",
      });
      ```
+   - Cookie clearing upon logout also adheres to this policy so cookies are properly cleared across origins.
 
 4. **Dynamic OAuth Redirect URIs:**
-   - In `Backend/src/controllers/auth.controller.js` and `auth.routes.js`, success and failure redirects point to `http://localhost:5173`.
-   - Update redirects to read from `process.env.CLIENT_URL`.
+   - Google OAuth callback and failure handlers in `Backend/src/controllers/auth.controller.js` and `Backend/src/routes/auth.routes.js` dynamically redirect to `config.FRONTEND_URL`:
+     ```javascript
+     const redirectUrl = config.FRONTEND_URL ? `${config.FRONTEND_URL}/` : "http://localhost:5173/";
+     res.redirect(redirectUrl);
+     ```
 
 5. **Token Blacklist Check in Middleware:**
-   - To completely enforce token invalidation on protected routes (`/api/cart`, `/api/auth/me`), verify `await redis.get(\`blacklist:${token}\`)` inside `authenticateUser` and `authenticateSeller` middleware.
+   - Both `authenticateUser` and `authenticateSeller` in `Backend/src/middlewares/auth.middleware.js` check Redis before verifying JWT signatures:
+     ```javascript
+     const isBlacklisted = await redis.get(`blacklist:${token}`);
+     if (isBlacklisted) {
+         return res.status(401).json({ message: "Unauthorized (Token is blacklisted)" });
+     }
+     ```
+   - Enforces immediate revocation of JWTs across all protected API routes upon logout.
 
 ---
 
