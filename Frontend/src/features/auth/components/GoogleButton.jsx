@@ -1,6 +1,12 @@
 import React from "react";
 
-export const GoogleButton = ({ text = "Continue with Google", href = "/api/auth/google", onClick }) => {
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
+export const GoogleButton = ({
+  text = "Continue with Google",
+  href = `${API_BASE}/api/auth/google`,
+  onClick,
+}) => {
   return (
     <a
       href={href}

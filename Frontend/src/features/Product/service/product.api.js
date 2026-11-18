@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 const productApiInstance = axios.create({
-    baseURL: "/api/products",
+    baseURL: `${API_BASE}/api/products`,
     withCredentials: true,
 });
 
