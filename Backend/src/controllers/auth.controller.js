@@ -79,7 +79,7 @@ export const googleCallback = async (req, res) => {
         sameSite: config.NODE_ENV === "production" ? "none" : "lax",
     });
 
-    const redirectUrl = config.FRONTEND_URL ? `${config.FRONTEND_URL}/` : "http://localhost:5173/";
+    const redirectUrl = config.NODE_ENV === "production" ? "/" : "http://localhost:5173/";
     res.redirect(redirectUrl);
 }
 
